@@ -28,6 +28,14 @@ const translation = {
     pasteImageLinkInvalid: '图片链接无效',
     imageUpload: '图片上传',
   },
+  voiceInput: {
+    listening: '正在聆听...',
+    startListening: '点击开始语音输入',
+    stopListening: '点击停止语音输入',
+    errorPermission: '未获得麦克风权限，请允许浏览器访问麦克风',
+    errorGeneral: '语音识别错误',
+    browserNotSupport: '您的浏览器不支持语音识别功能',
+  },
 }
 
 export default translation

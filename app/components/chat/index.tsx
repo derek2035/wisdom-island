@@ -15,6 +15,7 @@ import Toast from '@/app/components/base/toast'
 import ChatImageUploader from '@/app/components/base/image-uploader/chat-image-uploader'
 import ImageList from '@/app/components/base/image-uploader/image-list'
 import { useImageFiles } from '@/app/components/base/image-uploader/hooks'
+import VoiceInputButton from '../VoiceInputButton'
 
 export type IChatProps = {
   chatList: ChatItem[]
@@ -117,6 +118,19 @@ const Chat: FC<IChatProps> = ({
     }
   }
 
+  // 处理语音输入的回调
+  const handleVoiceInput = (text: string) => {
+    // 追加到当前输入，而不是替换
+    setQuery((currentQuery) => {
+      // 如果当前输入为空，直接设置为语音输入文本
+      if (!currentQuery.trim()) 
+        return text
+      
+      // 否则添加空格并追加
+      return `${currentQuery.trim()} ${text}`
+    })
+  }
+
   return (
     <div className={cn(!feedbackDisabled && 'px-3.5', 'h-full')}>
       {/* Chat List */}
@@ -183,6 +197,14 @@ const Chat: FC<IChatProps> = ({
               />
               <div className="absolute bottom-2 right-2 flex items-center h-8">
                 <div className={`${s.count} mr-4 h-5 leading-5 text-sm bg-gray-50 text-gray-500`}>{query.trim().length}</div>
+                
+                {/* 添加语音输入按钮 */}
+                <VoiceInputButton 
+                  onTranscript={handleVoiceInput}
+                  disabled={isResponding}
+                  className="mr-2"
+                />
+                
                 <Tooltip
                   selector='send-tip'
                   htmlContent={
