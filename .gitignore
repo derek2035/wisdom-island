@@ -49,3 +49,8 @@ yarn.lock
 
 # pmpm
 pnpm-lock.yaml
+
+# SSH密钥文件
+github*
+*.pem
+*.key
