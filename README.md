@@ -108,3 +108,116 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 #### 权限要求
 
 首次使用时，浏览器会请求麦克风访问权限。用户需要允许访问才能使用语音输入功能。
+
+## PWA和Android应用打包指南
+
+### 将网站转换为Android应用（TWA方案）
+
+1. **确保网站符合PWA标准**
+
+   - 添加manifest.json（已完成）
+   - 实现Service Worker（已完成）
+   - 添加适当的图标（已完成）
+2. **安装必要的工具**
+
+   ```bash
+   # 安装Bubblewrap CLI
+   npm install -g @bubblewrap/cli
+
+   # 确保已安装JDK 17
+   brew install openjdk@17
+   sudo ln -sfn /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-17.jdk
+   export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home
+   ```
+3. **创建数字签名密钥**
+
+   ```bash
+   mkdir -p signing-keys
+   keytool -genkey -v -keystore signing-keys/wisdom-island-key.keystore -alias wisdom-island -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=您的姓名, OU=Development, O=Wisdom Island, L=Unknown, ST=Unknown, C=CN" -storepass password -keypass password
+   ```
+4. **初始化TWA项目**
+
+   ```bash
+   mkdir -p twa-app
+   cd twa-app
+   bubblewrap init --manifest https://wisdom-island.vercel.app/manifest.json
+   ```
+
+   按照提示完成配置：
+
+   - 应用名称: 智慧岛
+   - 短名称: 智慧岛
+   - 包名: com.derek2035.wisdomisland
+   - 版本: 1.0.0
+   - 启动URL: https://wisdom-island.vercel.app/
+   - 签名密钥位置: ../signing-keys/wisdom-island-key.keystore
+   - 密钥别名: wisdom-island
+   - 密钥密码: (您设置的密码)
+   - 密钥库密码: (您设置的密码)
+5. **构建Android应用**
+
+   ```bash
+   bubblewrap build
+   ```
+6. **生成的APK文件将位于**
+
+   ```
+   ./app-release-signed.apk
+   ```
+
+### 使用Capacitor构建Android应用（替代方案）
+
+1. **安装Capacitor**
+
+   ```bash
+   yarn add @capacitor/cli @capacitor/core @capacitor/android
+   ```
+2. **初始化Capacitor项目**
+
+   ```bash
+   npx cap init 智慧岛 com.derek2035.wisdomisland
+   ```
+3. **配置Capacitor**
+   在 `capacitor.config.ts`中：
+
+   ```typescript
+   import { CapacitorConfig } from '@capacitor/cli';
+
+   const config: CapacitorConfig = {
+     appId: 'com.derek2035.wisdomisland',
+     appName: '智慧岛',
+     webDir: 'out',
+     server: {
+       androidScheme: 'https',
+       cleartext: true
+     },
+     android: {
+       buildOptions: {
+         releaseType: 'AAB'
+       }
+     }
+   };
+
+   export default config;
+   ```
+4. **构建Web应用**
+
+   ```bash
+   yarn build
+   ```
+5. **同步到Android平台**
+
+   ```bash
+   yarn cap sync android
+   ```
+6. **构建Android应用**
+
+   ```bash
+   yarn cap build android
+   ```
+   或使用Android Studio打开项目：
+
+   ```bash
+   yarn cap open android
+   ```
+   然后使用Android Studio构建应用。
