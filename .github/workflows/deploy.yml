@@ -26,17 +26,27 @@ jobs:
       - name: Build project
         run: npm run build
 
-      - name: Create .nojekyll file
-        run: touch out/.nojekyll  # 防止GitHub Pages忽略下划线文件[5](@ref)
-
-      - name: Update server via SSH
+      - name: Zip artifact for deployment
+        run: zip -r release.zip .next package.json package-lock.json public next.config.js
+        
+      - name: Deploy to Server
+        uses: appleboy/scp-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.PORT }}
+          source: "release.zip"
+          target: "/root/wisdom-island"
+          
+      - name: Execute remote commands
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ secrets.SSH_HOST }}
-          username: ${{ secrets.SSH_USER }}
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
-                  cd /root/wisdom-island
-                  git pull origin main
-                  npm install
-                  npm start 
+            cd /root/wisdom-island
+            unzip -o release.zip
+            npm install --production
+            pm2 restart wisdom-island || pm2 start npm --name "wisdom-island" -- start
