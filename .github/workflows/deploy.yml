@@ -12,7 +12,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: 18  # 按项目需求指定版本
+          node-version: 22  # 按项目需求指定版本
 
       - name: Cache node_modules
         uses: actions/cache@v3
