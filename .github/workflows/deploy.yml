@@ -1,0 +1,42 @@
+name: Deploy Wisdom Island
+on:
+  push:
+    branches: [main]  # 触发分支，按需修改
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18  # 按项目需求指定版本
+
+      - name: Cache node_modules
+        uses: actions/cache@v3
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-node-${{ hashFiles('package-lock.json') }}
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build project
+        run: npm run build
+
+      - name: Create .nojekyll file
+        run: touch out/.nojekyll  # 防止GitHub Pages忽略下划线文件[5](@ref)
+
+      - name: Update server via SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+                  cd /root/wisdom-island
+                  git pull origin main
+                  npm install
+                  npm start 

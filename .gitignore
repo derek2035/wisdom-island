@@ -54,3 +54,5 @@ pnpm-lock.yaml
 github*
 *.pem
 *.key
+wisdom
+*.pub
