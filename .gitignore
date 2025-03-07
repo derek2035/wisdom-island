@@ -55,4 +55,5 @@ github*
 *.pem
 *.key
 wisdom
+wisdomrsa
 *.pub
