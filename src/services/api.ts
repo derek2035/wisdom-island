@@ -60,21 +60,8 @@ export const userAPI = {
 
 // 学习相关 API
 export const learningAPI = {
-  getKnowledgePoints: async () => {
-    const response = await api.get<{
-      success: boolean;
-      data: KnowledgePoint[];
-    }>('/knowledge/points');
-    return response.data;
-  },
-
-  getCategories: async () => {
-    const response = await api.get<{
-      success: boolean;
-      data: Category[];
-    }>('/knowledge/categories');
-    return response.data;
-  },
+  getKnowledgePoints: () => axios.get('/api/knowledge/points').then(res => res.data.data),
+  getCategories: () => axios.get('/api/knowledge/categories').then(res => res.data.data),
   
   getKnowledgePoint: (id: string) => 
     api.get<void, APIResponse<KnowledgePoint>>(`/knowledge/points/${id}`),

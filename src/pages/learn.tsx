@@ -4,7 +4,7 @@ import { Layout } from '@/components/Layout'
 import KnowledgeMap from '@/components/KnowledgeMap'
 
 const StyledContainer = styled.div`
-  padding: 16px;
+  // padding: 16px;
   display: flex;
   flex-direction: column;
   gap: 24px;

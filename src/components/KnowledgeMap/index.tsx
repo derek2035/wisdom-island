@@ -5,63 +5,140 @@ import { KnowledgePoint, Category } from '@/types'
 import { learningAPI } from '@/services/api'
 
 const StyledContainer = styled.div`
-  padding: 24px;
   max-width: 1200px;
   margin: 0 auto;
+  width: 100%;
+`
+
+const MainWrapper = styled.div`
+  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-radius: 8px;
+  overflow: hidden;
 `
 
 const CategoryContainer = styled.div`
-  margin-bottom: 32px;
-`
-
-const CategoryName = styled.h2`
-  margin: 0 0 16px 0;
-  color: ${({ theme }) => theme.colors.text.primary};
-  font-size: 18px;
-  font-weight: 500;
-`
-
-const GridContainer = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-`
-
-const CategoryRow = styled.div`
-  display: flex;
-  gap: 2px;
-`
-
-const ParentCell = styled.div<{ level: number }>`
-  width: 40px;
-  height: 40px;
   background: ${({ theme }) => theme.colors.background};
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  cursor: pointer;
-  transition: background-color 0.2s ease;
 
-  &:hover {
-    background: ${({ theme }) => theme.colors.border};
+  & + & {
+    border-top: 1px solid ${({ theme }) => theme.colors.border};
   }
 `
 
-const ChildrenContainer = styled.div`
+const CategoryWrapper = styled.div`
+  background: ${({ theme }) => theme.colors.background};
   display: flex;
-  flex-wrap: wrap;
-  gap: 2px;
-  flex: 1;
+  flex-direction: column;
+`
+
+const CategoryName = styled.h2`
+  margin: 0;
+  padding: 12px 16px;
+  color: ${({ theme }) => theme.colors.text.primary};
+  font-size: 18px;
+  font-weight: 500;
+  background: ${({ theme }) => theme.colors.background};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  text-align: center;
+`
+
+const ParentPointsGrid = styled.div<{ count: number }>`
+  display: grid;
+  gap: 1px;
+  background: ${({ theme }) => theme.colors.border};
+  border-radius: 0;
+
+  ${({ count }) => {
+    if (count <= 3) {
+      return `grid-template-columns: repeat(${count}, 1fr);`
+    }
+    if (count === 4) {
+      return 'grid-template-columns: repeat(4, 1fr);'
+    }
+    if (count === 5) {
+      return `
+        grid-template-columns: repeat(6, 1fr);
+        grid-template-areas:
+          "a a b b c c"
+          "d d d e e e";
+        & > *:nth-child(1) { grid-area: a; }
+        & > *:nth-child(2) { grid-area: b; }
+        & > *:nth-child(3) { grid-area: c; }
+        & > *:nth-child(4) { grid-area: d; }
+        & > *:nth-child(5) { grid-area: e; }
+      `
+    }
+    if (count === 6) {
+      return 'grid-template-columns: repeat(3, 1fr);'
+    }
+    if (count === 7) {
+      return `
+        grid-template-columns: repeat(12, 1fr);
+        grid-template-areas:
+          "a a a b b b c c c d d d"
+          "e e e e f f f f g g g g";
+        & > *:nth-child(1) { grid-area: a; }
+        & > *:nth-child(2) { grid-area: b; }
+        & > *:nth-child(3) { grid-area: c; }
+        & > *:nth-child(4) { grid-area: d; }
+        & > *:nth-child(5) { grid-area: e; }
+        & > *:nth-child(6) { grid-area: f; }
+        & > *:nth-child(7) { grid-area: g; }
+      `
+    }
+    if (count === 8) {
+      return 'grid-template-columns: repeat(4, 1fr);'
+    }
+    if (count === 9) {
+      return 'grid-template-columns: repeat(3, 1fr);'
+    }
+    return 'grid-template-columns: repeat(4, 1fr);'
+  }}
+`
+
+const ParentPointCell = styled.div`
+  display: flex;
+  flex-direction: column;
+  background: ${({ theme }) => theme.colors.background};
+`
+
+const ParentPointHeader = styled.div`
+  padding: 8px 12px;
+  background: ${({ theme }) => theme.colors.background};
+  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  text-align: center;
+`
+
+const ParentPointName = styled.h3`
+  margin: 0;
+  color: ${({ theme }) => theme.colors.text.primary};
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+`
+
+const ChildrenGrid = styled.div`
+  display: flex;
+  background: ${({ theme }) => theme.colors.background};
 `
 
 const KnowledgeCell = styled.div<{ level: number }>`
-  width: 40px;
   height: 40px;
+  flex: 1;
   background: ${({ theme }) => theme.colors.background};
-  border: 1px solid ${({ theme }) => theme.colors.border};
+  border-right: 1px solid ${({ theme }) => theme.colors.border};
   cursor: pointer;
-  transition: background-color 0.2s ease;
+  transition: all 0.2s ease;
+
+  &:last-child {
+    border-right: none;
+  }
 
   &:hover {
     background: ${({ theme }) => theme.colors.border};
+    transform: scale(1.05);
   }
 `
 
@@ -162,58 +239,72 @@ const KnowledgeMap = () => {
     )
   }
 
-  // 获取所有父级知识点
-  const parentPoints = knowledgePoints.filter(point => !point.parent_id)
-  console.log('Parent points:', parentPoints)
+  // 获取所有父级知识点，并过滤掉没有子知识点的
+  const parentPoints = knowledgePoints
+    .filter(point => !point.parent_id)
+    .filter(point => {
+      // 检查是否有子知识点
+      const hasChildren = knowledgePoints.some(p => p.parent_id === point.id)
+      return hasChildren
+    })
+
+  console.log('Parent points with children:', parentPoints)
 
   // 按照分类分组父级知识点
   const pointsByCategory = parentPoints.reduce((acc, point) => {
     const categoryId = point.category_id
+    console.log('Processing point:', point.title, 'with category:', categoryId)
     if (!acc[categoryId]) {
       acc[categoryId] = []
     }
     acc[categoryId].push(point)
     return acc
   }, {} as Record<number, KnowledgePoint[]>)
-  console.log('Points by category:', pointsByCategory)
-  console.log('Categories:', categories)
+  
+  console.log('Points by category (detailed):', Object.entries(pointsByCategory).map(([categoryId, points]) => ({
+    categoryId,
+    pointCount: points.length,
+    points: points.map(p => ({ id: p.id, title: p.title }))
+  })))
+  console.log('Categories:', categories.map(c => ({ id: c.id, name: c.name })))
 
   return (
     <StyledContainer>
-      {categories.map(category => {
-        const categoryParentPoints = pointsByCategory[category.id] || []
-        if (categoryParentPoints.length === 0) return null
+      <MainWrapper>
+        {categories.map(category => {
+          const categoryParentPoints = pointsByCategory[category.id] || []
+          if (categoryParentPoints.length === 0) return null
 
-        return (
-          <CategoryContainer key={category.id}>
-            <CategoryName>{category.name}</CategoryName>
-            <GridContainer>
-              {categoryParentPoints.map(parent => {
-                const childPoints = groupedPoints[parent.id] || []
-                if (childPoints.length === 0) return null
-
-                return (
-                  <CategoryRow key={parent.id}>
-                    <ParentCell
-                      level={parent.level}
-                      onClick={() => handleCardClick(parent)}
-                    />
-                    <ChildrenContainer>
-                      {childPoints.map(point => (
-                        <KnowledgeCell
-                          key={point.id}
-                          level={point.level}
-                          onClick={() => handleCardClick(point)}
-                        />
-                      ))}
-                    </ChildrenContainer>
-                  </CategoryRow>
-                )
-              })}
-            </GridContainer>
-          </CategoryContainer>
-        )
-      })}
+          return (
+            <CategoryContainer key={category.id}>
+              <CategoryWrapper>
+                <CategoryName>{category.name}</CategoryName>
+                <ParentPointsGrid count={categoryParentPoints.length}>
+                  {categoryParentPoints.map(parent => {
+                    const childPoints = groupedPoints[parent.id] || []
+                    return (
+                      <ParentPointCell key={parent.id}>
+                        <ParentPointHeader>
+                          <ParentPointName>{parent.title}</ParentPointName>
+                        </ParentPointHeader>
+                        <ChildrenGrid>
+                          {childPoints.map(point => (
+                            <KnowledgeCell
+                              key={point.id}
+                              level={point.level}
+                              onClick={() => handleCardClick(point)}
+                            />
+                          ))}
+                        </ChildrenGrid>
+                      </ParentPointCell>
+                    )
+                  })}
+                </ParentPointsGrid>
+              </CategoryWrapper>
+            </CategoryContainer>
+          )
+        })}
+      </MainWrapper>
     </StyledContainer>
   )
 }
