@@ -33,6 +33,21 @@ model KnowledgePoint {
   parent      KnowledgePoint?   @relation("ParentChild", fields: [parent_id], references: [id])
   parent_id   Int?
   children    KnowledgePoint[]  @relation("ParentChild")
+  progress    UserKnowledgeProgress[]
 
   @@map("knowledge_points")
+}
+
+model UserKnowledgeProgress {
+  id                Int           @id @default(autoincrement())
+  user_id          String        // 用户ID
+  knowledge_point   KnowledgePoint @relation(fields: [knowledge_point_id], references: [id])
+  knowledge_point_id Int
+  completed_times   Int           @default(0) // 完成次数，默认0，最多4次
+  last_completed_at DateTime?     // 最后一次完成时间，可以为空
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+
+  @@unique([user_id, knowledge_point_id])
+  @@map("user_knowledge_progress")
 }

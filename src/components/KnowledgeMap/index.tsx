@@ -4,6 +4,7 @@ import { useRouter } from 'next/router'
 import { KnowledgePoint, Category } from '@/types'
 import { learningAPI } from '@/services/api'
 import { ArrowLeft } from 'lucide-react'
+import { DefaultTheme } from 'styled-components'
 
 const StyledContainer = styled.div`
   max-width: 1200px;
@@ -30,9 +31,6 @@ const CategoryContainer = styled.div<{ isClickable?: boolean }>`
   flex-direction: column;
   ${({ isClickable }) => isClickable && `
     cursor: pointer;
-    &:hover {
-      background: #F8FAFC;
-    }
   `}
 `
 
@@ -81,6 +79,7 @@ const ParentPointsGrid = styled.div`
   flex: 1;
   background: #93C5FD;
   gap: 1px;
+  height: 80px;
 `
 
 const ParentPointCell = styled.div<{ isClickable?: boolean }>`
@@ -88,37 +87,41 @@ const ParentPointCell = styled.div<{ isClickable?: boolean }>`
   display: grid;
   gap: 1px;
   background: #DBEAFE;
+  min-height: 80px;
   ${({ isClickable }) => isClickable && `
     cursor: pointer;
-    &:hover {
-      background: #F8FAFC;
-    }
   `}
 `
 
 const ParentPointName = styled.h3`
   margin: 0;
-  padding: 8px 12px;
-  color: #3B82F6;
+  padding: 0;
+  color: #3b82f6;
   font-size: 14px;
   font-weight: 500;
   background: ${({ theme }) => theme.colors.background};
-  border-bottom: 1px solid #93C5FD;
+  border-bottom: 1px solid #93c5fd;
   text-align: center;
-`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+`;
 
 const ExpandedParentPointsGrid = styled.div`
   display: grid;
-  grid-template-rows: 1fr 1fr;
-  background: #93C5FD;
+  grid-template-rows: repeat(2, auto);
+  background: #93c5fd;
   gap: 1px;
   flex: 1;
-`
+  min-height: 80px;
+`;
 
 const ExpandedParentPointRow = styled.div`
   display: flex;
   gap: 1px;
   background: #93C5FD;
+  
 `
 
 const ExpandedParentPointCell = styled.div`
@@ -126,14 +129,15 @@ const ExpandedParentPointCell = styled.div`
   display: flex;
   flex-direction: column;
   background: #DBEAFE;
-  min-height: 120px;
+  min-height: 80px;
 `
 
 const KnowledgePointGrid = styled.div<{ count: number }>`
   display: grid;
   width: 100%;
   gap: 1px;
-  background: #DBEAFE;
+  background: #dbeafe;
+  min-height: 80px;
   ${({ count }) => {
     if (count <= 3) {
       return `grid-template-columns: repeat(${count}, 1fr);`;
@@ -188,58 +192,60 @@ const KnowledgePointGrid = styled.div<{ count: number }>`
     const rows = Math.ceil(count / cols);
     const lastRowItems = count % cols || cols;
     const lastRowStart = count - lastRowItems + 1;
-    
+
     if (lastRowItems < cols) {
-      const colSpan = Math.floor(cols * cols / lastRowItems);
-      let extraCols = cols - (colSpan * lastRowItems);
-      
+      const colSpan = Math.floor((cols * cols) / lastRowItems);
+      let extraCols = cols - colSpan * lastRowItems;
+
       let gridAreas = '';
       for (let i = 1; i < lastRowStart; i++) {
-        gridAreas += `& > *:nth-child(${i}) { grid-area: ${Math.floor((i-1)/cols) + 1} / ${((i-1)%cols) + 1} / ${Math.floor((i-1)/cols) + 2} / ${((i-1)%cols) + 2}; }\n`;
+        gridAreas += `& > *:nth-child(${i}) { grid-area: ${
+          Math.floor((i - 1) / cols) + 1
+        } / ${((i - 1) % cols) + 1} / ${Math.floor((i - 1) / cols) + 2} / ${
+          ((i - 1) % cols) + 2
+        }; }\n`;
       }
-      
+
       let currentCol = 1;
       for (let i = lastRowStart; i <= count; i++) {
         const span = colSpan + (extraCols > 0 ? 1 : 0);
-        gridAreas += `& > *:nth-child(${i}) { grid-area: ${rows} / ${currentCol} / ${rows + 1} / ${currentCol + span}; }\n`;
+        gridAreas += `& > *:nth-child(${i}) { grid-area: ${rows} / ${currentCol} / ${
+          rows + 1
+        } / ${currentCol + span}; }\n`;
         currentCol += span;
         extraCols--;
       }
-      
+
       return `
         grid-template-columns: repeat(${cols}, 1fr);
         grid-template-rows: repeat(${rows}, 1fr);
         ${gridAreas}
       `;
     }
-    
+
     return `
       grid-template-columns: repeat(${cols}, 1fr);
       grid-template-rows: repeat(${rows}, 1fr);
     `;
   }}
-`
+`;
 
 const KnowledgePointCell = styled.div<{ hasTitle?: boolean }>`
   background: ${({ theme }) => theme.colors.background};
   cursor: pointer;
-  transition: all 0.2s ease;
-  height: 40px;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  ${({ hasTitle }) => hasTitle && `
+  ${({ hasTitle, theme }) =>
+    hasTitle &&
+    `
     font-size: 12px;
-    color: ${({ theme }) => theme.colors.text.primary};
-    padding: 0 8px;
+    color: ${theme.colors.text.primary};
+    padding: 16px 8px;
     text-align: center;
   `}
-
-  &:hover {
-    background: #EFF6FF;
-    transform: scale(1.05);
-  }
-`
+`;
 
 const LoadingSpinner = styled.div`
   display: flex;
