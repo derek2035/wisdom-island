@@ -6,42 +6,25 @@ async function main() {
   // 获取所有知识点
   const knowledgePoints = await prisma.knowledgePoint.findMany()
   
-  // 为每个知识点随机生成进度
+  // 为用户ID 1 创建随机学习记录
   for (const point of knowledgePoints) {
-    // 70% 的概率生成进度记录
+    // 70%的概率创建学习记录
     if (Math.random() < 0.7) {
-      // 随机生成1-4次完成记录
+      // 随机完成次数 (1-4次)
       const completedTimes = Math.floor(Math.random() * 4) + 1
       
-      // 生成随机的最后完成时间（过去30天内）
-      const daysAgo = Math.floor(Math.random() * 30)
-      const lastCompletedAt = new Date()
-      lastCompletedAt.setDate(lastCompletedAt.getDate() - daysAgo)
-      
-      await prisma.userKnowledgeProgress.upsert({
-        where: {
-          user_id_knowledge_point_id: {
-            user_id: "1",
-            knowledge_point_id: point.id
-          }
-        },
-        update: {
-          completed_times: completedTimes,
-          last_completed_at: lastCompletedAt
-        },
-        create: {
+      await prisma.userKnowledgeProgress.create({
+        data: {
           user_id: "1",
           knowledge_point_id: point.id,
           completed_times: completedTimes,
-          last_completed_at: lastCompletedAt
+          last_completed_at: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000) // 随机过去30天内的时间
         }
       })
-
-      console.log(`Created/Updated progress for knowledge point ${point.title}`)
     }
   }
-  
-  console.log('Random progress records created successfully!')
+
+  console.log('Random learning progress data seeded successfully!')
 }
 
 main()

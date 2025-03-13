@@ -62,6 +62,7 @@ export const userAPI = {
 export const learningAPI = {
   getKnowledgePoints: () => axios.get('/api/knowledge/points').then(res => res.data.data),
   getCategories: () => axios.get('/api/knowledge/categories').then(res => res.data.data),
+  getUserProgress: (userId: string) => axios.get(`/api/knowledge/progress/${userId}`).then(res => res.data.data),
   
   getKnowledgePoint: (id: string) => 
     api.get<void, APIResponse<KnowledgePoint>>(`/knowledge/points/${id}`),

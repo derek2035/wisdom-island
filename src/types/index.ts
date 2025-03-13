@@ -17,25 +17,27 @@ export interface UserProfileUpdate {
 export interface KnowledgePoint {
   id: number
   title: string
-  content: string
   level: number
   grade: number
+  content: string
+  order_index: number
   category_id: number
   parent_id: number | null
-  order_index: number
-  created_at?: string
-  isUnlocked: boolean
-  isCompleted: boolean
-  completionCount: number
-  category?: Category
+  objective: string
+  keyPoints: string[] | null
+  category?: Omit<Category, 'created_at'>
   parent?: KnowledgePoint | null
   children?: KnowledgePoint[]
+  UserKnowledgeProgress?: UserKnowledgeProgress[]
+  isCompleted?: boolean
+  completionCount?: number
+  lastCompletedAt?: Date | null
 }
 
 export interface Category {
   id: number
   name: string
-  description: string
+  description?: string
   created_at?: string
 }
 
@@ -92,6 +94,15 @@ export interface APIResponse<T> {
   data: T
   message?: string
   success: boolean
+}
+
+export interface UserKnowledgeProgress {
+  id: number
+  user_id: string
+  knowledge_point_id: number
+  completed_times: number
+  last_completed_at: Date
+  knowledge_point?: KnowledgePoint
 }
 
 export * from './castle' 

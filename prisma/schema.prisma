@@ -27,6 +27,8 @@ model KnowledgePoint {
   level       Int
   grade       Int
   content     String           @db.Text
+  objective   String           @db.Text
+  keyPoints   Json             @default("[]") // 存储为JSON数组
   order_index Int
   category    KnowledgeCategory @relation(fields: [category_id], references: [id])
   category_id Int
