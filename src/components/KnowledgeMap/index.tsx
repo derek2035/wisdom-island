@@ -11,20 +11,19 @@ const StyledContainer = styled.div`
 `
 
 const MainWrapper = styled.div`
-  border: 1px solid ${({ theme }) => theme.colors.border};
-  border-radius: 8px;
+  border: 1px solid #3B82F6;
+  border-radius: 12px;
   overflow: hidden;
 `
 
-const CategoryContainer = styled.div`
-  background: ${({ theme }) => theme.colors.background};
-
-  & + & {
-    border-top: 1px solid ${({ theme }) => theme.colors.border};
-  }
+const CategoryGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: #3B82F6;
 `
 
-const CategoryWrapper = styled.div`
+const CategoryContainer = styled.div`
   background: ${({ theme }) => theme.colors.background};
   display: flex;
   flex-direction: column;
@@ -32,112 +31,128 @@ const CategoryWrapper = styled.div`
 
 const CategoryName = styled.h2`
   margin: 0;
-  padding: 12px 16px;
-  color: ${({ theme }) => theme.colors.text.primary};
-  font-size: 18px;
+  padding: 8px 12px;
+  color: #3B82F6;
+  font-size: 14px;
   font-weight: 500;
   background: ${({ theme }) => theme.colors.background};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
+  border-bottom: 1px solid #3B82F6;
   text-align: center;
 `
 
-const ParentPointsGrid = styled.div<{ count: number }>`
+const ParentPointsGrid = styled.div`
+  display: flex;
+  flex: 1;
+  background: #93C5FD;
+  gap: 1px;
+`
+
+const ParentPointCell = styled.div`
+  flex: 1;
+  height: 120px;
   display: grid;
   gap: 1px;
-  background: ${({ theme }) => theme.colors.border};
-  border-radius: 0;
+  background: #DBEAFE;
+`
 
+const KnowledgePointGrid = styled.div<{ count: number }>`
+  display: grid;
+  width: 100%;
+  height: 100%;
+  gap: 1px;
   ${({ count }) => {
     if (count <= 3) {
-      return `grid-template-columns: repeat(${count}, 1fr);`
+      return `grid-template-columns: repeat(${count}, 1fr);`;
     }
     if (count === 4) {
-      return 'grid-template-columns: repeat(4, 1fr);'
+      return `grid-template-columns: repeat(4, 1fr);`;
     }
     if (count === 5) {
       return `
         grid-template-columns: repeat(6, 1fr);
-        grid-template-areas:
-          "a a b b c c"
-          "d d d e e e";
-        & > *:nth-child(1) { grid-area: a; }
-        & > *:nth-child(2) { grid-area: b; }
-        & > *:nth-child(3) { grid-area: c; }
-        & > *:nth-child(4) { grid-area: d; }
-        & > *:nth-child(5) { grid-area: e; }
-      `
+        grid-template-rows: 1fr 1fr;
+        & > *:nth-child(1) { grid-area: 1 / 1 / 2 / 3; }
+        & > *:nth-child(2) { grid-area: 1 / 3 / 2 / 5; }
+        & > *:nth-child(3) { grid-area: 1 / 5 / 2 / 7; }
+        & > *:nth-child(4) { grid-area: 2 / 1 / 3 / 4; }
+        & > *:nth-child(5) { grid-area: 2 / 4 / 3 / 7; }
+      `;
     }
     if (count === 6) {
-      return 'grid-template-columns: repeat(3, 1fr);'
+      return `
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+      `;
     }
     if (count === 7) {
       return `
         grid-template-columns: repeat(12, 1fr);
-        grid-template-areas:
-          "a a a b b b c c c d d d"
-          "e e e e f f f f g g g g";
-        & > *:nth-child(1) { grid-area: a; }
-        & > *:nth-child(2) { grid-area: b; }
-        & > *:nth-child(3) { grid-area: c; }
-        & > *:nth-child(4) { grid-area: d; }
-        & > *:nth-child(5) { grid-area: e; }
-        & > *:nth-child(6) { grid-area: f; }
-        & > *:nth-child(7) { grid-area: g; }
-      `
+        grid-template-rows: 1fr 1fr;
+        & > *:nth-child(1) { grid-area: 1 / 1 / 2 / 4; }
+        & > *:nth-child(2) { grid-area: 1 / 4 / 2 / 7; }
+        & > *:nth-child(3) { grid-area: 1 / 7 / 2 / 10; }
+        & > *:nth-child(4) { grid-area: 1 / 10 / 2 / 13; }
+        & > *:nth-child(5) { grid-area: 2 / 1 / 3 / 5; }
+        & > *:nth-child(6) { grid-area: 2 / 5 / 3 / 9; }
+        & > *:nth-child(7) { grid-area: 2 / 9 / 3 / 13; }
+      `;
     }
     if (count === 8) {
-      return 'grid-template-columns: repeat(4, 1fr);'
+      return `
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(2, 1fr);
+      `;
     }
     if (count === 9) {
-      return 'grid-template-columns: repeat(3, 1fr);'
+      return `
+        grid-template-columns: repeat(3, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+      `;
     }
-    return 'grid-template-columns: repeat(4, 1fr);'
+    // 其他情况
+    const cols = Math.ceil(Math.sqrt(count));
+    const rows = Math.ceil(count / cols);
+    const lastRowItems = count % cols || cols;
+    const lastRowStart = count - lastRowItems + 1;
+    
+    if (lastRowItems < cols) {
+      const colSpan = Math.floor(cols * cols / lastRowItems);
+      let extraCols = cols - (colSpan * lastRowItems);
+      
+      let gridAreas = '';
+      for (let i = 1; i < lastRowStart; i++) {
+        gridAreas += `& > *:nth-child(${i}) { grid-area: ${Math.floor((i-1)/cols) + 1} / ${((i-1)%cols) + 1} / ${Math.floor((i-1)/cols) + 2} / ${((i-1)%cols) + 2}; }\n`;
+      }
+      
+      let currentCol = 1;
+      for (let i = lastRowStart; i <= count; i++) {
+        const span = colSpan + (extraCols > 0 ? 1 : 0);
+        gridAreas += `& > *:nth-child(${i}) { grid-area: ${rows} / ${currentCol} / ${rows + 1} / ${currentCol + span}; }\n`;
+        currentCol += span;
+        extraCols--;
+      }
+      
+      return `
+        grid-template-columns: repeat(${cols}, 1fr);
+        grid-template-rows: repeat(${rows}, 1fr);
+        ${gridAreas}
+      `;
+    }
+    
+    return `
+      grid-template-columns: repeat(${cols}, 1fr);
+      grid-template-rows: repeat(${rows}, 1fr);
+    `;
   }}
 `
 
-const ParentPointCell = styled.div`
-  display: flex;
-  flex-direction: column;
+const KnowledgePointCell = styled.div`
   background: ${({ theme }) => theme.colors.background};
-`
-
-const ParentPointHeader = styled.div`
-  padding: 8px 12px;
-  background: ${({ theme }) => theme.colors.background};
-  border-bottom: 1px solid ${({ theme }) => theme.colors.border};
-  text-align: center;
-`
-
-const ParentPointName = styled.h3`
-  margin: 0;
-  color: ${({ theme }) => theme.colors.text.primary};
-  font-size: 14px;
-  font-weight: 500;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  text-align: center;
-`
-
-const ChildrenGrid = styled.div`
-  display: flex;
-  background: ${({ theme }) => theme.colors.background};
-`
-
-const KnowledgeCell = styled.div<{ level: number }>`
-  height: 40px;
-  flex: 1;
-  background: ${({ theme }) => theme.colors.background};
-  border-right: 1px solid ${({ theme }) => theme.colors.border};
   cursor: pointer;
   transition: all 0.2s ease;
 
-  &:last-child {
-    border-right: none;
-  }
-
   &:hover {
-    background: ${({ theme }) => theme.colors.border};
+    background: #EFF6FF;
     transform: scale(1.05);
   }
 `
@@ -271,39 +286,35 @@ const KnowledgeMap = () => {
   return (
     <StyledContainer>
       <MainWrapper>
-        {categories.map(category => {
-          const categoryParentPoints = pointsByCategory[category.id] || []
-          if (categoryParentPoints.length === 0) return null
+        <CategoryGrid>
+          {categories.map(category => {
+            const categoryParentPoints = pointsByCategory[category.id] || []
+            if (categoryParentPoints.length === 0) return null
 
-          return (
-            <CategoryContainer key={category.id}>
-              <CategoryWrapper>
+            return (
+              <CategoryContainer key={category.id}>
                 <CategoryName>{category.name}</CategoryName>
-                <ParentPointsGrid count={categoryParentPoints.length}>
+                <ParentPointsGrid>
                   {categoryParentPoints.map(parent => {
                     const childPoints = groupedPoints[parent.id] || []
                     return (
                       <ParentPointCell key={parent.id}>
-                        <ParentPointHeader>
-                          <ParentPointName>{parent.title}</ParentPointName>
-                        </ParentPointHeader>
-                        <ChildrenGrid>
+                        <KnowledgePointGrid count={childPoints.length}>
                           {childPoints.map(point => (
-                            <KnowledgeCell
+                            <KnowledgePointCell
                               key={point.id}
-                              level={point.level}
                               onClick={() => handleCardClick(point)}
                             />
                           ))}
-                        </ChildrenGrid>
+                        </KnowledgePointGrid>
                       </ParentPointCell>
                     )
                   })}
                 </ParentPointsGrid>
-              </CategoryWrapper>
-            </CategoryContainer>
-          )
-        })}
+              </CategoryContainer>
+            )
+          })}
+        </CategoryGrid>
       </MainWrapper>
     </StyledContainer>
   )
