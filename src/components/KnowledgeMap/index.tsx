@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { useRouter } from 'next/router'
 import { KnowledgePoint, Category, UserKnowledgeProgress } from '@/types'
 import { learningAPI } from '@/services/api'
-import { ArrowLeft } from 'lucide-react'
+import { ArrowLeft, Lightbulb } from 'lucide-react'
 import { DefaultTheme } from 'styled-components'
 
 // 颜色值定义
@@ -55,6 +55,7 @@ const StyledContainer = styled.div`
   max-width: 1200px;
   margin: 0 auto;
   width: 100%;
+  padding: 12px;
 `
 
 const MainWrapper = styled.div`
@@ -348,6 +349,55 @@ const ProgressBar = styled.div<{ progress: number }>`
   transition: width 0.3s ease;
 `
 
+const TipMessage = styled.div`
+  background: #FFF8E5;
+  border-radius: 12px;
+  padding: 12px 16px;
+  margin: 0 0 16px;
+  color: #6B5900;
+  font-size: 14px;
+  line-height: 1.5;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  box-shadow: 0 2px 4px rgba(107, 89, 0, 0.05);
+  border: 1px dashed #FFD666;
+
+  svg {
+    flex-shrink: 0;
+    color: #FFB800;
+    margin-top: 2px;
+    width: 20px;
+    height: 20px;
+  }
+
+  p {
+    margin: 0 0 8px;
+  }
+`
+
+const ColorLegend = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  font-size: 13px;
+`
+
+const LegendItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 90px;
+`
+
+const LegendColor = styled.div<{ color: string }>`
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background-color: ${({ color }) => color};
+  border: 1px solid rgba(0, 0, 0, 0.1);
+`
+
 interface ViewState {
   type: 'all' | 'category' | 'parent';
   category?: Category;
@@ -501,6 +551,34 @@ const KnowledgeMap = () => {
     return (
       <StyledContainer>
         <Title>知识图谱</Title>
+        <TipMessage>
+          <Lightbulb size={24} />
+          <div>
+            <p>小朋友，下面是所有小学数学的知识点示意图哦！每个小格子代表一个知识点。</p>
+            <ColorLegend>
+              <LegendItem>
+                <LegendColor color="#FFFFFF" />
+                <span>还没开始学习</span>
+              </LegendItem>
+              <LegendItem>
+                <LegendColor color="#E9FFE9" />
+                <span>刚刚开始学习</span>
+              </LegendItem>
+              <LegendItem>
+                <LegendColor color="#C6FFC6" />
+                <span>学习的不错</span>
+              </LegendItem>
+              <LegendItem>
+                <LegendColor color="#90EE90" />
+                <span>快要掌握啦</span>
+              </LegendItem>
+              <LegendItem>
+                <LegendColor color="#50C878" />
+                <span>已经完全掌握</span>
+              </LegendItem>
+            </ColorLegend>
+          </div>
+        </TipMessage>
         <MainWrapper>
           <CategoryContainer>
             <Header>
@@ -545,6 +623,34 @@ const KnowledgeMap = () => {
     return (
       <StyledContainer>
         <Title>知识图谱</Title>
+        <TipMessage>
+          <Lightbulb size={24} />
+          <div>
+            <p>小朋友，下面是所有小学数学的知识点示意图哦！每个小格子代表一个知识点。</p>
+            <ColorLegend>
+              <LegendItem>
+                <LegendColor color="#FFFFFF" />
+                <span>还没开始学习</span>
+              </LegendItem>
+              <LegendItem>
+                <LegendColor color="#E9FFE9" />
+                <span>刚刚开始学习</span>
+              </LegendItem>
+              <LegendItem>
+                <LegendColor color="#C6FFC6" />
+                <span>学习的不错</span>
+              </LegendItem>
+              <LegendItem>
+                <LegendColor color="#90EE90" />
+                <span>快要掌握啦</span>
+              </LegendItem>
+              <LegendItem>
+                <LegendColor color="#50C878" />
+                <span>已经完全掌握</span>
+              </LegendItem>
+            </ColorLegend>
+          </div>
+        </TipMessage>
         <MainWrapper>
           <CategoryContainer>
             <Header>
@@ -619,6 +725,34 @@ const KnowledgeMap = () => {
   return (
     <StyledContainer>
       <Title>知识图谱</Title>
+      <TipMessage>
+        <Lightbulb size={24} />
+        <div>
+          <p>小朋友，下面是所有小学数学的知识点示意图哦！每个小格子代表一个知识点。</p>
+          <ColorLegend>
+            <LegendItem>
+              <LegendColor color="#FFFFFF" />
+              <span>还没开始学习</span>
+            </LegendItem>
+            <LegendItem>
+              <LegendColor color="#E9FFE9" />
+              <span>刚刚开始学习</span>
+            </LegendItem>
+            <LegendItem>
+              <LegendColor color="#C6FFC6" />
+              <span>学习的不错</span>
+            </LegendItem>
+            <LegendItem>
+              <LegendColor color="#90EE90" />
+              <span>快要掌握啦</span>
+            </LegendItem>
+            <LegendItem>
+              <LegendColor color="#50C878" />
+              <span>已经完全掌握</span>
+            </LegendItem>
+          </ColorLegend>
+        </div>
+      </TipMessage>
       <MainWrapper>
         <CategoryGrid>
           {categories.map(category => {

@@ -14,27 +14,36 @@ const StyledContainer = styled.div`
   padding: 24px;
   max-width: 800px;
   margin: 0 auto;
+  background: #FAFAFA;
 `
 
 const Title = styled.h1`
-  font-size: 24px;
-  margin-bottom: 16px;
-  color: ${({ theme }) => theme.colors.text.primary};
+  font-size: 28px;
+  margin-bottom: 20px;
+  color: #2E3192;
+  text-align: center;
+  font-weight: bold;
+  text-shadow: 1px 1px 0 #fff;
 `
 
 const Content = styled.div`
   background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 24px;
+  padding: 28px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 28px;
+  border: 2px solid #E8F3FF;
 `
 
 const Description = styled.div`
-  color: ${({ theme }) => theme.colors.text.secondary};
+  color: #555;
   font-size: 16px;
-  line-height: 1.6;
+  line-height: 1.8;
   margin-bottom: 24px;
+  padding: 16px;
+  background: #F8FBFF;
+  border-radius: 12px;
+  border: 1px solid #E8F3FF;
 `
 
 const MetaInfo = styled.div`
@@ -46,24 +55,34 @@ const MetaInfo = styled.div`
 `
 
 const Tag = styled.span`
-  background: ${({ theme }) => theme.colors.background};
-  padding: 4px 12px;
-  border-radius: 16px;
+  background: #E8F3FF;
+  padding: 6px 16px;
+  border-radius: 20px;
+  font-size: 15px;
+  color: #2E3192;
+  font-weight: 500;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  border: 1px solid #D1E8FF;
 `
 
 const Button = styled.button<{ isDisabled?: boolean }>`
-  background: ${({ theme, isDisabled }) => isDisabled ? theme.colors.border : theme.colors.primary};
+  background: ${({ theme, isDisabled }) => isDisabled ? '#E0E0E0' : '#4A90E2'};
   color: white;
   border: none;
-  padding: 12px 24px;
-  border-radius: 8px;
+  padding: 14px 28px;
+  border-radius: 25px;
   cursor: ${({ isDisabled }) => isDisabled ? 'not-allowed' : 'pointer'};
   font-size: 16px;
+  font-weight: bold;
   margin-top: 24px;
   opacity: ${({ isDisabled }) => isDisabled ? 0.7 : 1};
+  box-shadow: 0 4px 8px rgba(74, 144, 226, 0.2);
+  transition: all 0.3s ease;
 
   &:hover {
     opacity: ${({ isDisabled }) => isDisabled ? 0.7 : 0.9};
+    transform: ${({ isDisabled }) => isDisabled ? 'none' : 'translateY(-2px)'};
+    box-shadow: ${({ isDisabled }) => isDisabled ? 'none' : '0 6px 12px rgba(74, 144, 226, 0.3)'};
   }
 `
 
@@ -96,10 +115,11 @@ const SecondaryButton = styled(Button)`
 
 const ProgressSection = styled.div`
   background: white;
-  padding: 24px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  margin-bottom: 24px;
+  padding: 28px;
+  border-radius: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-bottom: 28px;
+  border: 2px solid #FFE8F3;
 `
 
 const ProgressTitle = styled.h3`
@@ -118,22 +138,30 @@ const ProgressGrid = styled.div`
 `
 
 const ProgressCard = styled.div`
-  background: ${({ theme }) => theme.colors.background};
-  padding: 16px;
-  border-radius: 8px;
+  background: #F8FBFF;
+  padding: 20px;
+  border-radius: 16px;
   text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  border: 2px solid #E8F3FF;
+  transition: transform 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+  }
 `
 
 const ProgressValue = styled.div`
-  font-size: 24px;
+  font-size: 28px;
   font-weight: 600;
-  color: ${({ theme }) => theme.colors.primary};
+  color: #4A90E2;
   margin-bottom: 8px;
 `
 
 const ProgressLabel = styled.div`
-  font-size: 14px;
-  color: ${({ theme }) => theme.colors.text.secondary};
+  font-size: 15px;
+  color: #666;
+  font-weight: 500;
 `
 
 const RelatedSection = styled.div`
@@ -191,23 +219,38 @@ const ContentSection = styled.div`
 `
 
 const ContentTitle = styled.h3`
-  font-size: 16px;
-  font-weight: 500;
-  color: ${({ theme }) => theme.colors.text.primary};
-  margin-bottom: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #2E3192;
+  margin-bottom: 16px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+  padding: 8px 16px;
+  background: #F0F7FF;
+  border-radius: 12px;
+  border-left: 4px solid #4A90E2;
 `
 
 const KeyPointsList = styled.ul`
   margin: 0;
-  padding-left: 20px;
+  padding-left: 24px;
   
   li {
-    color: ${({ theme }) => theme.colors.text.secondary};
-    margin-bottom: 8px;
+    color: #555;
+    margin-bottom: 12px;
     line-height: 1.6;
+    position: relative;
+    padding-left: 8px;
+
+    &:before {
+      content: "•";
+      color: #4A90E2;
+      font-size: 24px;
+      position: absolute;
+      left: -20px;
+      top: -4px;
+    }
 
     &:last-child {
       margin-bottom: 0;
@@ -259,28 +302,92 @@ const ChildPoint = styled.div`
   align-items: center;
   gap: 16px;
   cursor: pointer;
+  padding: 16px;
+  background: #F8FBFF;
+  border-radius: 12px;
+  border: 1px solid #E8F3FF;
+  transition: all 0.3s ease;
+
+  h4 {
+    color: #2E3192;
+    margin-bottom: 4px;
+    font-size: 16px;
+  }
+
+  p {
+    color: #666;
+    font-size: 14px;
+  }
 
   &:hover {
-    background: ${({ theme }) => theme.colors.border};
+    transform: translateX(8px);
+    background: #F0F7FF;
+    border-color: #D1E8FF;
   }
 `
 
 const ExpirationInfo = styled.div`
-  color: ${({ theme }) => theme.colors.text.secondary};
-  font-size: 14px;
+  color: #666;
+  font-size: 15px;
   display: flex;
   align-items: center;
-  gap: 8px;
-  margin: 12px 0 24px;
-  background: ${({ theme }) => theme.colors.background};
-  padding: 12px 16px;
-  border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  gap: 12px;
+  margin: 16px 0 28px;
+  background: #F8FBFF;
+  padding: 16px 20px;
+  border-radius: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  border: 2px solid #E8F3FF;
 `
 
 const ExpirationTime = styled.span<{ isExpired: boolean }>`
-  color: ${({ theme, isExpired }) => isExpired ? theme.colors.error : theme.colors.success};
-  font-weight: 500;
+  color: ${({ isExpired }) => isExpired ? '#FF6B6B' : '#2AC769'};
+  font-weight: 600;
+  font-size: 16px;
+`
+
+const TipMessage = styled.div`
+  background: #FFF8E5;
+  border-radius: 16px;
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  color: #6B5900;
+  font-size: 15px;
+  line-height: 1.6;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 2px 8px rgba(107, 89, 0, 0.1);
+  border: 2px dashed #FFD666;
+
+  svg {
+    flex-shrink: 0;
+    color: #FFB800;
+  }
+
+  p {
+    margin: 0;
+  }
+`
+
+const ColorLegend = styled.div`
+  display: flex;
+  gap: 16px;
+  margin-top: 12px;
+  font-size: 14px;
+`
+
+const LegendItem = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+`
+
+const LegendColor = styled.div<{ color: string }>`
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  background-color: ${({ color }) => color};
 `
 
 export default function KnowledgePointDetail() {
@@ -521,6 +628,26 @@ export default function KnowledgePointDetail() {
         </Content>
 
         <ProgressSection>
+          <TipMessage>
+            <Lightbulb size={24} />
+            <div>
+              <p>小朋友，下面是所有小学数学的知识点示意图哦！每个小格子代表一个知识点。</p>
+              <ColorLegend>
+                <LegendItem>
+                  <LegendColor color="#E8F5E9" />
+                  <span>刚开始学习</span>
+                </LegendItem>
+                <LegendItem>
+                  <LegendColor color="#81C784" />
+                  <span>学习中</span>
+                </LegendItem>
+                <LegendItem>
+                  <LegendColor color="#2E7D32" />
+                  <span>已经掌握啦</span>
+                </LegendItem>
+              </ColorLegend>
+            </div>
+          </TipMessage>
           <ProgressTitle>
             <Award size={20} />
             学习进度
