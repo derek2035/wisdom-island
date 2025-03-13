@@ -42,18 +42,21 @@ const Header = styled.div`
   padding: 0;
   border-bottom: 1px solid #3B82F6;
   background: ${({ theme }) => theme.colors.background};
+  position: relative;
 `
 
 const BackButton = styled.button`
   background: none;
   border: none;
   padding: 4px;
-  margin-right: 8px;
+  margin-left: 12px;
   cursor: pointer;
   color: #3B82F6;
   display: flex;
   align-items: center;
   justify-content: center;
+  position: absolute;
+  left: 0;
   
   &:hover {
     background: #EFF6FF;
@@ -69,7 +72,8 @@ const CategoryName = styled.h2<{ isMain?: boolean }>`
   font-weight: 500;
   background: ${({ theme }) => theme.colors.background};
   border-bottom: ${({ isMain }) => isMain ? 'none' : '1px solid #3B82F6'};
-  text-align: ${({ isMain }) => isMain ? 'left' : 'center'};
+  text-align: center;
+  flex: 1;
 `
 
 const ParentPointsGrid = styled.div`
@@ -332,7 +336,9 @@ const KnowledgeMap = () => {
   }, {} as Record<number, KnowledgePoint[]>)
 
   const getChildPoints = (parentId: number) => {
-    return knowledgePoints.filter(point => point.parent_id === parentId)
+    return knowledgePoints
+      .filter(point => point.parent_id === parentId)
+      .sort((a, b) => a.title.length - b.title.length)
   }
 
   if (view.type === 'parent' && view.parent) {
@@ -401,7 +407,7 @@ const KnowledgeMap = () => {
                         {childPoints.map(point => (
                           <KnowledgePointCell
                             key={point.id}
-                            onClick={(e) => handlePointClick(point, e)}
+                            onClick={(e) => handleParentClick(parent, e)}
                           />
                         ))}
                       </KnowledgePointGrid>
@@ -424,7 +430,7 @@ const KnowledgeMap = () => {
                         {childPoints.map(point => (
                           <KnowledgePointCell
                             key={point.id}
-                            onClick={(e) => handlePointClick(point, e)}
+                            onClick={(e) => handleParentClick(parent, e)}
                           />
                         ))}
                       </KnowledgePointGrid>
@@ -469,7 +475,7 @@ const KnowledgeMap = () => {
                           {childPoints.map(point => (
                             <KnowledgePointCell
                               key={point.id}
-                              onClick={(e) => handlePointClick(point, e)}
+                              onClick={(e) => handleCategoryClick(category, e)}
                             />
                           ))}
                         </KnowledgePointGrid>
