@@ -71,11 +71,11 @@ const CategoryGrid = styled.div`
   background: #3B82F6;
 `
 
-const CategoryContainer = styled.div<{ isClickable?: boolean }>`
+const CategoryContainer = styled.div<{ $isClickable?: boolean }>`
   background: ${({ theme }) => theme.colors.background};
   display: flex;
   flex-direction: column;
-  ${({ isClickable }) => isClickable && `
+  ${({ $isClickable }) => $isClickable && `
     cursor: pointer;
   `}
 `
@@ -107,14 +107,14 @@ const BackButton = styled.button`
   }
 `
 
-const CategoryName = styled.h2<{ isMain?: boolean; avgColor?: string }>`
+const CategoryName = styled.h2<{ $isMain?: boolean; $avgColor?: string }>`
   margin: 0;
   padding: 8px 12px;
   color: #3B82F6;
   font-size: 14px;
   font-weight: 500;
-  background: ${({ avgColor }) => avgColor || '#FFFFFF'};
-  border-bottom: ${({ isMain }) => isMain ? 'none' : '1px solid #3B82F6'};
+  background: ${({ $avgColor }) => $avgColor || '#FFFFFF'};
+  border-bottom: ${({ $isMain }) => $isMain ? 'none' : '1px solid #3B82F6'};
   text-align: center;
   flex: 1;
 `
@@ -127,13 +127,13 @@ const ParentPointsGrid = styled.div`
   height: 80px;
 `
 
-const ParentPointCell = styled.div<{ isClickable?: boolean }>`
+const ParentPointCell = styled.div<{ $isClickable?: boolean }>`
   flex: 1;
   display: grid;
   gap: 1px;
   background: #DBEAFE;
   min-height: 80px;
-  ${({ isClickable }) => isClickable && `
+  ${({ $isClickable }) => $isClickable && `
     cursor: pointer;
   `}
 `
@@ -275,18 +275,18 @@ const KnowledgePointGrid = styled.div<{ count: number }>`
   }}
 `;
 
-const KnowledgePointCell = styled.div<{ hasTitle?: boolean; completedTimes?: number }>`
-  background: ${({ completedTimes }) => {
-    if (completedTimes === undefined) return COMPLETION_COLORS[0];
-    return COMPLETION_COLORS[Math.min(4, completedTimes) as keyof typeof COMPLETION_COLORS];
+const KnowledgePointCell = styled.div<{ $hasTitle?: boolean; $completedTimes?: number }>`
+  background: ${({ $completedTimes }) => {
+    if ($completedTimes === undefined) return COMPLETION_COLORS[0];
+    return COMPLETION_COLORS[Math.min(4, $completedTimes) as keyof typeof COMPLETION_COLORS];
   }};
   cursor: pointer;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  ${({ hasTitle, theme }) =>
-    hasTitle &&
+  ${({ $hasTitle, theme }) =>
+    $hasTitle &&
     `
     font-size: 12px;
     color: ${theme.colors.text.primary};
@@ -353,48 +353,48 @@ const TipMessage = styled.div`
   background: #FFF8E5;
   border-radius: 12px;
   padding: 12px 16px;
-  margin: 0 0 16px;
+  margin: 0 0 12px;
   color: #6B5900;
-  font-size: 14px;
-  line-height: 1.5;
+  font-size: 13px;
+  line-height: 1.4;
   display: flex;
   align-items: flex-start;
-  gap: 12px;
-  box-shadow: 0 2px 4px rgba(107, 89, 0, 0.05);
+  gap: 10px;
+  box-shadow: 0 1px 2px rgba(107, 89, 0, 0.05);
   border: 1px dashed #FFD666;
 
   svg {
     flex-shrink: 0;
     color: #FFB800;
     margin-top: 2px;
-    width: 20px;
-    height: 20px;
+    width: 18px;
+    height: 18px;
   }
 
   p {
-    margin: 0 0 8px;
+    margin: 0 0 6px;
   }
 `
 
 const ColorLegend = styled.div`
-  display: flex;
+  display: inline-flex;
   flex-wrap: wrap;
-  gap: 12px;
-  font-size: 13px;
+  gap: 8px;
+  font-size: 12px;
 `
 
 const LegendItem = styled.div`
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-width: 90px;
+  gap: 4px;
+  min-width: 80px;
 `
 
-const LegendColor = styled.div<{ color: string }>`
-  width: 16px;
-  height: 16px;
-  border-radius: 4px;
-  background-color: ${({ color }) => color};
+const LegendColor = styled.div<{ $color: string }>`
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+  background-color: ${({ $color }) => $color};
   border: 1px solid rgba(0, 0, 0, 0.1);
 `
 
@@ -557,23 +557,23 @@ const KnowledgeMap = () => {
             <p>小朋友，下面是所有小学数学的知识点示意图哦！每个小格子代表一个知识点。</p>
             <ColorLegend>
               <LegendItem>
-                <LegendColor color="#FFFFFF" />
+                <LegendColor $color="#FFFFFF" />
                 <span>还没开始学习</span>
               </LegendItem>
               <LegendItem>
-                <LegendColor color="#E9FFE9" />
+                <LegendColor $color="#E9FFE9" />
                 <span>刚刚开始学习</span>
               </LegendItem>
               <LegendItem>
-                <LegendColor color="#C6FFC6" />
+                <LegendColor $color="#C6FFC6" />
                 <span>学习的不错</span>
               </LegendItem>
               <LegendItem>
-                <LegendColor color="#90EE90" />
+                <LegendColor $color="#90EE90" />
                 <span>快要掌握啦</span>
               </LegendItem>
               <LegendItem>
-                <LegendColor color="#50C878" />
+                <LegendColor $color="#50C878" />
                 <span>已经完全掌握</span>
               </LegendItem>
             </ColorLegend>
@@ -585,7 +585,7 @@ const KnowledgeMap = () => {
               <BackButton onClick={handleBack}>
                 <ArrowLeft size={20} />
               </BackButton>
-              <CategoryName isMain avgColor={avgColor}>{view.parent.title}</CategoryName>
+              <CategoryName $isMain $avgColor={avgColor}>{view.parent.title}</CategoryName>
             </Header>
             <ParentPointsGrid>
               <ParentPointCell>
@@ -594,8 +594,8 @@ const KnowledgeMap = () => {
                     <KnowledgePointCell
                       key={point.id}
                       onClick={(e) => handlePointClick(point, e)}
-                      hasTitle
-                      completedTimes={userProgress[point.id]?.completed_times || 0}
+                      $hasTitle
+                      $completedTimes={userProgress[point.id]?.completed_times || 0}
                     >
                       {point.title}
                     </KnowledgePointCell>
@@ -629,23 +629,23 @@ const KnowledgeMap = () => {
             <p>小朋友，下面是所有小学数学的知识点示意图哦！每个小格子代表一个知识点。</p>
             <ColorLegend>
               <LegendItem>
-                <LegendColor color="#FFFFFF" />
+                <LegendColor $color="#FFFFFF" />
                 <span>还没开始学习</span>
               </LegendItem>
               <LegendItem>
-                <LegendColor color="#E9FFE9" />
+                <LegendColor $color="#E9FFE9" />
                 <span>刚刚开始学习</span>
               </LegendItem>
               <LegendItem>
-                <LegendColor color="#C6FFC6" />
+                <LegendColor $color="#C6FFC6" />
                 <span>学习的不错</span>
               </LegendItem>
               <LegendItem>
-                <LegendColor color="#90EE90" />
+                <LegendColor $color="#90EE90" />
                 <span>快要掌握啦</span>
               </LegendItem>
               <LegendItem>
-                <LegendColor color="#50C878" />
+                <LegendColor $color="#50C878" />
                 <span>已经完全掌握</span>
               </LegendItem>
             </ColorLegend>
@@ -657,7 +657,7 @@ const KnowledgeMap = () => {
               <BackButton onClick={handleBack}>
                 <ArrowLeft size={20} />
               </BackButton>
-              <CategoryName isMain avgColor={avgColor}>{view.category.name}</CategoryName>
+              <CategoryName $isMain $avgColor={avgColor}>{view.category.name}</CategoryName>
             </Header>
             <ExpandedParentPointsGrid>
               <ExpandedParentPointRow>
@@ -679,7 +679,7 @@ const KnowledgeMap = () => {
                           <KnowledgePointCell
                             key={point.id}
                             onClick={(e) => handleParentClick(parent, e)}
-                            completedTimes={userProgress[point.id]?.completed_times || 0}
+                            $completedTimes={userProgress[point.id]?.completed_times || 0}
                           />
                         ))}
                       </KnowledgePointGrid>
@@ -706,7 +706,7 @@ const KnowledgeMap = () => {
                           <KnowledgePointCell
                             key={point.id}
                             onClick={(e) => handleParentClick(parent, e)}
-                            completedTimes={userProgress[point.id]?.completed_times || 0}
+                            $completedTimes={userProgress[point.id]?.completed_times || 0}
                           />
                         ))}
                       </KnowledgePointGrid>
@@ -731,23 +731,23 @@ const KnowledgeMap = () => {
           <p>小朋友，下面是所有小学数学的知识点示意图哦！每个小格子代表一个知识点。</p>
           <ColorLegend>
             <LegendItem>
-              <LegendColor color="#FFFFFF" />
+              <LegendColor $color="#FFFFFF" />
               <span>还没开始学习</span>
             </LegendItem>
             <LegendItem>
-              <LegendColor color="#E9FFE9" />
+              <LegendColor $color="#E9FFE9" />
               <span>刚刚开始学习</span>
             </LegendItem>
             <LegendItem>
-              <LegendColor color="#C6FFC6" />
+              <LegendColor $color="#C6FFC6" />
               <span>学习的不错</span>
             </LegendItem>
             <LegendItem>
-              <LegendColor color="#90EE90" />
+              <LegendColor $color="#90EE90" />
               <span>快要掌握啦</span>
             </LegendItem>
             <LegendItem>
-              <LegendColor color="#50C878" />
+              <LegendColor $color="#50C878" />
               <span>已经完全掌握</span>
             </LegendItem>
           </ColorLegend>
@@ -767,10 +767,10 @@ const KnowledgeMap = () => {
             return (
               <CategoryContainer
                 key={category.id}
-                isClickable
+                $isClickable
                 onClick={(e) => handleCategoryClick(category, e)}
               >
-                <CategoryName avgColor={avgColor}>{category.name}</CategoryName>
+                <CategoryName $avgColor={avgColor}>{category.name}</CategoryName>
                 <ParentPointsGrid>
                   {categoryPoints.map(parent => {
                     const childPoints = getChildPoints(parent.id)
@@ -779,7 +779,7 @@ const KnowledgeMap = () => {
                     return (
                       <ParentPointCell
                         key={parent.id}
-                        isClickable
+                        $isClickable
                         onClick={(e) => handleParentClick(parent, e)}
                       >
                         <KnowledgePointGrid count={childPoints.length}>
@@ -787,7 +787,7 @@ const KnowledgeMap = () => {
                             <KnowledgePointCell
                               key={point.id}
                               onClick={(e) => handleCategoryClick(category, e)}
-                              completedTimes={userProgress[point.id]?.completed_times || 0}
+                              $completedTimes={userProgress[point.id]?.completed_times || 0}
                             />
                           ))}
                         </KnowledgePointGrid>

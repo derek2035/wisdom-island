@@ -12,6 +12,7 @@ const StyledContainer = styled.div`
   display: flex;
   flex-direction: column;
   padding: 24px;
+  padding-bottom: 140px;
   max-width: 800px;
   margin: 0 auto;
   background: #FAFAFA;
@@ -65,32 +66,12 @@ const Tag = styled.span`
   border: 1px solid #D1E8FF;
 `
 
-const Button = styled.button<{ isDisabled?: boolean }>`
-  background: ${({ theme, isDisabled }) => isDisabled ? '#E0E0E0' : '#4A90E2'};
-  color: white;
-  border: none;
-  padding: 14px 28px;
-  border-radius: 25px;
-  cursor: ${({ isDisabled }) => isDisabled ? 'not-allowed' : 'pointer'};
-  font-size: 16px;
-  font-weight: bold;
-  margin-top: 24px;
-  opacity: ${({ isDisabled }) => isDisabled ? 0.7 : 1};
-  box-shadow: 0 4px 8px rgba(74, 144, 226, 0.2);
-  transition: all 0.3s ease;
-
-  &:hover {
-    opacity: ${({ isDisabled }) => isDisabled ? 0.7 : 0.9};
-    transform: ${({ isDisabled }) => isDisabled ? 'none' : 'translateY(-2px)'};
-    box-shadow: ${({ isDisabled }) => isDisabled ? 'none' : '0 6px 12px rgba(74, 144, 226, 0.3)'};
-  }
-`
-
 const LoadingSpinner = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
   height: 200px;
+  color: ${({ theme }) => theme.colors.text.secondary};
 `
 
 const ErrorMessage = styled.div`
@@ -102,7 +83,42 @@ const ErrorMessage = styled.div`
 const ButtonGroup = styled.div`
   display: flex;
   gap: 16px;
-  margin-top: 24px;
+  position: fixed;
+  bottom: 64px;
+  left: 0;
+  right: 0;
+  padding: 16px 24px;
+  background: white;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+
+  @media (min-width: 800px) {
+    max-width: 800px;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+`
+
+const Button = styled.button`
+  flex: 1;
+  padding: 14px 24px;
+  border: none;
+  border-radius: 8px;
+  background: #3B82F6;
+  color: white;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: #2563EB;
+  }
+
+  &:disabled {
+    background: #E5E7EB;
+    cursor: not-allowed;
+  }
 `
 
 const PrimaryButton = styled(Button)`
@@ -133,7 +149,7 @@ const ProgressTitle = styled.h3`
 
 const ProgressGrid = styled.div`
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(3, 1fr);
   gap: 16px;
 `
 
@@ -628,26 +644,7 @@ export default function KnowledgePointDetail() {
         </Content>
 
         <ProgressSection>
-          <TipMessage>
-            <Lightbulb size={24} />
-            <div>
-              <p>小朋友，下面是所有小学数学的知识点示意图哦！每个小格子代表一个知识点。</p>
-              <ColorLegend>
-                <LegendItem>
-                  <LegendColor color="#E8F5E9" />
-                  <span>刚开始学习</span>
-                </LegendItem>
-                <LegendItem>
-                  <LegendColor color="#81C784" />
-                  <span>学习中</span>
-                </LegendItem>
-                <LegendItem>
-                  <LegendColor color="#2E7D32" />
-                  <span>已经掌握啦</span>
-                </LegendItem>
-              </ColorLegend>
-            </div>
-          </TipMessage>
+          
           <ProgressTitle>
             <Award size={20} />
             学习进度
@@ -656,10 +653,6 @@ export default function KnowledgePointDetail() {
             <ProgressCard>
               <ProgressValue>{currentKnowledgePoint.completionCount || 0}</ProgressValue>
               <ProgressLabel>通过考核次数</ProgressLabel>
-            </ProgressCard>
-            <ProgressCard>
-              <ProgressValue>25%</ProgressValue>
-              <ProgressLabel>当前进度</ProgressLabel>
             </ProgressCard>
             <ProgressCard>
               <ProgressValue>120</ProgressValue>
