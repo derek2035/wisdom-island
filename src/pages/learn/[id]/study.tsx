@@ -3,11 +3,12 @@ import { useRouter } from 'next/router'
 import styled from 'styled-components'
 import { Layout } from '@/components/Layout'
 import { Send, ArrowLeft } from 'lucide-react'
+import { prisma } from '@/lib/prisma'
 
 const StyledContainer = styled.div`
   display: flex;
   flex-direction: column;
-  height: calc(100vh - 64px);
+  height: calc(100vh - 100px);
   max-width: 800px;
   margin: 0 auto;
   background: white;
@@ -17,8 +18,8 @@ const StyledContainer = styled.div`
 const Header = styled.div`
   display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 16px 24px;
+  gap: 12px;
+  padding: 0 0 12px 0;
   border-bottom: 1px solid #E5E7EB;
   background: white;
   position: sticky;
@@ -29,7 +30,7 @@ const Header = styled.div`
 const BackButton = styled.button`
   background: none;
   border: none;
-  padding: 8px;
+  padding: 6px;
   cursor: pointer;
   border-radius: 8px;
   color: #666;
@@ -40,7 +41,7 @@ const BackButton = styled.button`
 `
 
 const Title = styled.h1`
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 600;
   color: #111827;
   margin: 0;
@@ -49,13 +50,13 @@ const Title = styled.h1`
 const ChatContainer = styled.div`
   flex: 1;
   overflow-y: auto;
-  padding: 24px;
+  padding: 16px 0;
 `
 
 const MessageList = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 16px;
 `
 
 const Message = styled.div<{ isUser: boolean }>`
@@ -92,7 +93,7 @@ const MessageContent = styled.div<{ isUser: boolean }>`
 `
 
 const InputContainer = styled.div`
-  padding: 20px;
+  padding: 20px 0;
   background: white;
   border-top: 1px solid #E5E7EB;
 `
@@ -171,9 +172,34 @@ export default function StudyPage() {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
+  const [title, setTitle] = useState('')
   const chatContainerRef = useRef<HTMLDivElement>(null)
   const abortControllerRef = useRef<AbortController>(new AbortController())
   const conversationIdRef = useRef<string>('')
+
+  // 获取知识点标题
+  useEffect(() => {
+    async function fetchKnowledgePoint() {
+      if (!knowledgePointId) return
+      
+      try {
+        const response = await fetch(`/api/knowledge-points/${knowledgePointId}`)
+        if (!response.ok) throw new Error('Failed to fetch knowledge point')
+        
+        const data = await response.json()
+        setTitle(data.title)
+      } catch (error) {
+        console.error('Error fetching knowledge point:', error)
+      }
+    }
+
+    fetchKnowledgePoint()
+  }, [knowledgePointId])
+
+  // 调试路由参数
+  useEffect(() => {
+    console.log('Router query:', router.query)
+  }, [router.query])
 
   // 定义固定的输入参数
   const currInputs = {
@@ -189,10 +215,10 @@ export default function StudyPage() {
     setMessages([
       {
         id: '1',
-        content: '你好！我是你的AI学习助手。让我们开始学习吧！有什么问题都可以问我。',
-        isUser: false
-      }
-    ])
+        content: '你好！我是你的数学老师。我们下面学习' + title,
+        isUser: false,
+      },
+    ]);
   }, [])
 
   // 自动滚动到最新消息
@@ -322,9 +348,9 @@ export default function StudyPage() {
       <StyledContainer>
         <Header>
           <BackButton onClick={() => router.back()}>
-            <ArrowLeft size={20} />
+            <ArrowLeft size={18} />
           </BackButton>
-          <Title>AI学习助手</Title>
+          <Title>{title || 'AI学习助手'}</Title>
         </Header>
 
         <ChatContainer ref={chatContainerRef}>
