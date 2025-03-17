@@ -1,0 +1,18 @@
+<svg width="500" height="500" xmlns="http://www.w3.org/2000/svg" style="background-color:white;">
+  <!-- 平行四边形轮廓 -->
+  <polygon points="100,200 400,200 340,350 40,350" style="fill:none;stroke:black;stroke-width:2" />
+  
+  <!-- 标注边长 -->
+  <text x="250" y="190" text-anchor="middle" font-size="12">6cm</text>
+  <text x="420" y="275" text-anchor="middle" font-size="12" transform="rotate(-30,420,275)">4cm</text>
+  
+  <!-- 标注高度 -->
+  <line x1="100" y1="200" x2="100" y1="350" style="stroke:red;stroke-width:2" />
+  <text x="80" y="275" text-anchor="middle" font-size="12" transform="rotate(-90,80,275)">3cm</text>
+  
+  <!-- 顶点标注 -->
+  <text x="95" y="195" text-anchor="end" font-size="12">A</text>
+  <text x="405" y="195" text-anchor="start" font-size="12">B</text>
+  <text x="345" y="355" text-anchor="start" font-size="12">C</text>
+  <text x="35" y="355" text-anchor="end" font-size="12">D</text>
+</svg>

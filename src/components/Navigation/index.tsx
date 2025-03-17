@@ -16,12 +16,12 @@ const StyledNav = styled.nav`
   z-index: 1000;
 `
 
-const NavItem = styled.div<{ active?: boolean }>`
+const NavItem = styled.div<{ $active?: boolean }>`
   display: flex;
   flex-direction: column;
   align-items: center;
   text-decoration: none;
-  color: ${({ active, theme }) => (active ? theme.colors.primary : theme.colors.text.secondary)};
+  color: ${({ $active, theme }) => ($active ? theme.colors.primary : theme.colors.text.secondary)};
   font-size: 12px;
   padding: 4px 8px;
   cursor: pointer;
@@ -41,19 +41,19 @@ const Navigation = () => {
 
   return (
     <StyledNav>
-      <NavItem active={router.pathname === '/'} onClick={() => navigate('/')}>
+      <NavItem $active={router.pathname === '/'} onClick={() => navigate('/')}>
         <StyledIcon>🏠</StyledIcon>
         <span>首页</span>
       </NavItem>
-      <NavItem active={router.pathname === '/learn'} onClick={() => navigate('/learn')}>
+      <NavItem $active={router.pathname === '/learn'} onClick={() => navigate('/learn')}>
         <StyledIcon>📚</StyledIcon>
         <span>学习</span>
       </NavItem>
-      <NavItem active={router.pathname === '/castle'} onClick={() => navigate('/castle')}>
+      <NavItem $active={router.pathname === '/castle'} onClick={() => navigate('/castle')}>
         <StyledIcon>🏰</StyledIcon>
         <span>城堡</span>
       </NavItem>
-      <NavItem active={router.pathname === '/profile'} onClick={() => navigate('/profile')}>
+      <NavItem $active={router.pathname === '/profile'} onClick={() => navigate('/profile')}>
         <StyledIcon>👤</StyledIcon>
         <span>我的</span>
       </NavItem>
