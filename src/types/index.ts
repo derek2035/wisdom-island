@@ -32,6 +32,8 @@ export interface KnowledgePoint {
   isCompleted?: boolean
   completionCount?: number
   lastCompletedAt?: Date | null
+  isUnlocked?: boolean
+  description?: string
 }
 
 export interface Category {
@@ -103,6 +105,12 @@ export interface UserKnowledgeProgress {
   completed_times: number
   last_completed_at: Date
   knowledge_point?: KnowledgePoint
+}
+
+export interface Message {
+  role: 'user' | 'assistant'
+  content: string
+  createdAt: string
 }
 
 export * from './castle' 

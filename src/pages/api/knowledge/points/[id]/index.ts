@@ -60,7 +60,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       },
       isCompleted: point.progress.length > 0,
       completionCount: point.progress[0]?.completed_times || 0,
-      lastCompletedAt: point.progress[0]?.last_completed_at || null
+      lastCompletedAt: point.progress[0]?.last_completed_at || null,
+      isUnlocked: true // 默认解锁，或根据业务逻辑设置
     }
 
     res.status(200).json({ 

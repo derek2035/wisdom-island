@@ -5,7 +5,6 @@ import { Layout } from '@/components/Layout';
 import { Send, ArrowLeft, RefreshCw } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { prisma } from '@/lib/prisma';
 
 const StyledContainer = styled.div`
   display: flex;
@@ -243,6 +242,45 @@ const SendButton = styled.button<{ disabled: boolean }>`
   }
 `;
 
+const RetryButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: none;
+  border: none;
+  color: #4F46E5;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  margin-top: 8px;
+
+  &:hover {
+    background: rgba(79, 70, 229, 0.1);
+  }
+`;
+
+const InstructionButtons = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+`;
+
+const InstructionButton = styled.button`
+  background: rgba(79, 70, 229, 0.1);
+  border: none;
+  color: #4F46E5;
+  padding: 4px 12px;
+  border-radius: 16px;
+  cursor: pointer;
+  font-size: 14px;
+
+  &:hover {
+    background: rgba(79, 70, 229, 0.2);
+  }
+`;
+
 interface Message {
   id: string;
   content: string;
@@ -251,13 +289,12 @@ interface Message {
   error?: boolean;
   instructions?: { text: string; action: string }[];
   originalQuery?: string;
-  hasSVG?: boolean;
 }
 
 interface ChatResponse {
   conversation_id?: string;
   message_id?: string;
-  event?: 'message_end' | 'agent_message' | 'agent_thought' | string;
+  event?: 'message_end' | 'message' | 'thought' | string;
   answer?: string;
   thought?: string;
   observation?: string;
@@ -268,16 +305,7 @@ interface ChatResponse {
 
 // 清理消息内容，移除 XML 标签
 function cleanMessageContent(content: string) {
-  return content//.replace(/<\/?课程>/g, '').trim();
-}
-
-// 生成UUID v4
-function generateUUID() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0;
-    const v = c === 'x' ? r : (r & 0x3) | 0x8;
-    return v.toString(16);
-  });
+  return content;
 }
 
 // 处理消息内容，提取指令
@@ -309,381 +337,101 @@ function processMessageContent(content: string): {
   return { displayContent, instructions };
 }
 
-// 添加指令按钮组件
-const InstructionButtons = styled.div`
-  display: flex;
-  gap: 12px;
-  margin-top: 8px;
-`;
-
-const InstructionButton = styled.button`
-  background: ${({ theme }) => theme.colors.primary};
-  color: white;
-  border: none;
-  padding: 6px 24px;
-  border-radius: 16px;
-  font-size: 14px;
-  cursor: pointer;
-  transition: opacity 0.2s;
-
-  &:hover {
-    opacity: 0.9;
-  }
-`;
-
-const RetryButton = styled.button`
-  background: none;
-  border: none;
-  padding: 4px;
-  margin-top: 8px;
-  cursor: pointer;
-  color: #EF4444;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 14px;
-  transition: opacity 0.2s;
-
-  &:hover {
-    opacity: 0.8;
-  }
-
-  & svg {
-    width: 16px;
-    height: 16px;
-  }
-`;
-
-const SVGSkeleton = styled.div<{ style?: React.CSSProperties }>`
-  width: 100%;
-  border-radius: 8px;
-  overflow: hidden;
-  position: relative;
-
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(
-      90deg,
-      transparent 0%,
-      rgba(79, 70, 229, 0.2) 50%,
-      transparent 100%
-    );
-    animation: shimmer 1.5s infinite linear;
-    will-change: transform;
-  }
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(79, 70, 229, 0.1);
-  }
-
-  @keyframes shimmer {
-    0% {
-      transform: translateX(-100%);
-    }
-    100% {
-      transform: translateX(100%);
-    }
-  }
-`;
-
-const SVGRenderer = memo(({ content }: { content: string }) => {
-  const [isLoading, setIsLoading] = useState(true);
-  const [svgHeight, setSvgHeight] = useState(300); // 默认高度
-  const svgRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef(content);
-  const skeletonKey = useRef(Math.random()).current; // 为骨架图生成一个固定的 key
-
-  useEffect(() => {
-    if (!svgRef.current) return;
-
-    const observer = new MutationObserver((mutations) => {
-      mutations.forEach((mutation) => {
-        if (mutation.type === 'childList') {
-          const svg = svgRef.current?.querySelector('svg');
-          if (svg) {
-            // 获取 SVG 的实际高度比例
-            const viewBox = svg.getAttribute('viewBox')?.split(' ').map(Number) || [0, 0, 500, 500];
-            const width = parseFloat(svg.getAttribute('width') || '500');
-            const height = parseFloat(svg.getAttribute('height') || '500');
-            const aspectRatio = (viewBox[3] || height) / (viewBox[2] || width);
-            const containerWidth = svgRef.current?.clientWidth || 500;
-            const newHeight = containerWidth * aspectRatio;
-            
-            setSvgHeight(newHeight);
-            // 使用 requestAnimationFrame 来确保高度更新后再隐藏骨架图
-            requestAnimationFrame(() => {
-              setIsLoading(false);
-            });
-            observer.disconnect();
-          }
-        }
-      });
-    });
-
-    observer.observe(svgRef.current, {
-      childList: true,
-      subtree: true
-    });
-
-    // 设置一个超时，以防 SVG 加载时间过长
-    const timeoutId = setTimeout(() => {
-      setIsLoading(false);
-      observer.disconnect();
-    }, 2000);
-
-    return () => {
-      observer.disconnect();
-      clearTimeout(timeoutId);
-    };
-  }, []);
-
-  // 处理 SVG 属性
-  const processedContent = useMemo(() => {
-    return content.replace(/<svg([^>]*)>/, (match, attributes) => {
-      let newAttributes = attributes;
-      
-      // 添加 viewBox 属性
-      if (!attributes.includes('viewBox')) {
-        const widthMatch = attributes.match(/width="([^"]*)"/) || attributes.match(/width='([^']*)'/) || ['', '500'];
-        const heightMatch = attributes.match(/height="([^"]*)"/) || attributes.match(/height='([^']*)'/) || ['', '500'];
-        const width = parseFloat(widthMatch[1]) || 500;
-        const height = parseFloat(heightMatch[1]) || 500;
-        newAttributes += ` viewBox="0 0 ${width} ${height}"`;
-      }
-      
-      // 添加 preserveAspectRatio 属性
-      if (!attributes.includes('preserveAspectRatio')) {
-        newAttributes += ` preserveAspectRatio="xMidYMid meet"`;
-      }
-      
-      return `<svg${newAttributes}>`;
-    });
-  }, [content]);
-
-  const containerStyle = useMemo(() => ({
-    width: '100%',
-    maxWidth: '100%',
-    margin: '12px 0',
-    height: svgHeight,
-    position: 'relative' as const
-  }), [svgHeight]);
-
-  const svgStyle = useMemo(() => ({
-    width: '100%', 
-    height: '100%',
-    opacity: isLoading ? 0 : 1,
-    transition: 'opacity 0.3s ease'
-  }), [isLoading]);
-
-  return (
-    <div style={containerStyle}>
-      {isLoading && (
-        <SVGSkeleton 
-          key={skeletonKey}
-          style={{ 
-            position: 'absolute', 
-            top: 0, 
-            left: 0, 
-            right: 0, 
-            height: '100%',
-            background: '#f3f4f6'
-          }} 
-        />
-      )}
-      <div 
-        ref={svgRef}
-        style={svgStyle}
-        dangerouslySetInnerHTML={{ __html: processedContent }} 
-      />
-    </div>
-  );
-});
-
-SVGRenderer.displayName = 'SVGRenderer';
-
-function renderSVG(svgContent: string) {
-  return <SVGRenderer content={svgContent} />;
-}
-
 // 添加新的 memo 组件来处理消息内容
 const MessageRenderer = memo(({ content, isUser, message }: { 
   content: string; 
   isUser: boolean;
   message: Message;
 }) => {
-  return (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      components={{
-        pre: ({ node, children, ...props }) => {
-          const codeElement = (node as any)?.children?.[0];
-          if (codeElement?.type === 'element' && codeElement?.tagName === 'code') {
-            const codeContent = codeElement?.children?.[0];
-            if (codeContent?.type === 'text') {
-              let content = String(codeContent.value || '').trim();
-              const svgStartIndex = content.indexOf('<svg');
-              const svgEndIndex = content.lastIndexOf('</svg>') + 6;
-              
-              if (svgStartIndex !== -1 && svgEndIndex !== -1) {
-                const svgContent = content.substring(svgStartIndex, svgEndIndex);
-                message.hasSVG = true;
-                return renderSVG(svgContent);
-              }
-            }
-          }
-          return <pre {...props}>{children}</pre>;
-        },
-        code: ({ className, children, ...props }) => {
-          const content = String(children).trim();
-          if (content.startsWith('<svg') && content.endsWith('</svg>')) {
-            message.hasSVG = true;
-            return renderSVG(content);
-          }
-          return <code className={className} {...props}>{children}</code>;
-        },
-        p: ({ node, children, ...props }) => {
-          const content = String(children).trim();
-          const svgStartIndex = content.indexOf('<svg');
-          const svgEndIndex = content.lastIndexOf('</svg>') + 6;
-          
-          if (svgStartIndex !== -1 && svgEndIndex !== -1) {
-            const svgContent = content.substring(svgStartIndex, svgEndIndex);
-            const textBefore = content.substring(0, svgStartIndex);
-            const textAfter = content.substring(svgEndIndex);
-            
-            message.hasSVG = true;
-            return (
-              <>
-                {textBefore && <p {...props}>{textBefore}</p>}
-                {renderSVG(svgContent)}
-                {textAfter && <p {...props}>{textAfter}</p>}
-              </>
-            );
-          }
-          return <p {...props}>{children}</p>;
+  const [displayContent, setDisplayContent] = useState('');
+  const [isComplete, setIsComplete] = useState(false);
+  const contentRef = useRef(content);
+  const timerRef = useRef<NodeJS.Timeout>();
+
+  useEffect(() => {
+    if (content !== contentRef.current) {
+      contentRef.current = content;
+      if (content.startsWith(displayContent)) {
+        // 如果新内容是在原有内容基础上追加的，继续从当前位置打字
+        setIsComplete(false);
+      } else {
+        // 如果是完全不同的内容，重置打字效果
+        setDisplayContent('');
+        setIsComplete(false);
+      }
+    }
+  }, [content, displayContent]);
+
+  useEffect(() => {
+    if (!isComplete && displayContent.length < content.length) {
+      timerRef.current = setTimeout(() => {
+        setDisplayContent(content.slice(0, displayContent.length + 1));
+      }, 30);
+      return () => {
+        if (timerRef.current) {
+          clearTimeout(timerRef.current);
         }
-      }}
-    >
-      {content}
-    </ReactMarkdown>
+      };
+    } else if (displayContent.length === content.length && !isComplete) {
+      setIsComplete(true);
+    }
+  }, [content, displayContent, isComplete]);
+
+  return (
+    <>
+      <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
+        components={{
+          pre: ({ node, children, ...props }) => {
+            return <pre {...props}>{children}</pre>;
+          },
+          code: ({ className, children, ...props }) => {
+            return <code className={className} {...props}>{children}</code>;
+          },
+        }}
+      >
+        {displayContent}
+      </ReactMarkdown>
+     
+    </>
   );
-}, (prevProps, nextProps) => {
-  // 只有当内容真正改变时才重新渲染
-  return prevProps.content === nextProps.content;
 });
 
-MessageRenderer.displayName = 'MessageRenderer';
-
-export default function StudyPage() {
+const QuizPage = () => {
   const router = useRouter();
-  const { id: knowledgePointId } = router.query;
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [title, setTitle] = useState('');
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController>(new AbortController());
   const conversationIdRef = useRef<string>('');
-  const hasIntroducedRef = useRef(false);
+  const initialMessageSentRef = useRef(false);
 
   // 初始化欢迎消息
   useEffect(() => {
-    if (title) {
-      setMessages([
-        {
-          id: '1',
-          content: `你好！我是你的数学老师。我们下面学习${title}。`,
-          isUser: false,
-        },
-      ]);
+    if (messages.length === 0 && !initialMessageSentRef.current) {
+      // setMessages([
+      //   {
+      //     id: '1',
+      //     content: '你好！我是你的数学老师。让我们开始知识竞猜吧！',
+      //     isUser: false,
+      //   },
+      // ]);
+      initialMessageSentRef.current = true;
+      
+      // 发送初始消息给 AI
+      handleAIMessage('请开始出题');
     }
-  }, [title]);
-
-  // 获取知识点标题并自动发送介绍消息
-  useEffect(() => {
-    async function fetchKnowledgePoint() {
-      if (!knowledgePointId) return;
-
-      try {
-        const response = await fetch(
-          `/api/knowledge-points/${knowledgePointId}`
-        );
-        if (!response.ok) throw new Error('Failed to fetch knowledge point');
-
-        const data = await response.json();
-        setTitle(data.title);
-
-        // 延迟发送知识点介绍，等待欢迎消息显示
-        if (!hasIntroducedRef.current) {
-          hasIntroducedRef.current = true;
-          setTimeout(() => {
-            handleAIMessage(`作为一名小学数学老师，请详细介绍一下${data.title}这个知识点。请按照以下格式进行回复：
-## 1. 这个知识点是什么？
-
-[这里详细说明概念，每句话都要换行]
-
-## 2. 为什么要学习它？
-
-[分点列举理由，每点都要换行]
-
-## 3. 关键概念和重点
-
-[分点列举，确保每个概念都独立成行]
-
-## 4. 学习注意事项
-
-[分点说明，每点都要换行]
-
-注意：
-- 确保每个标题独立成行！每个标题和它的内容之间要换行！
-- 每个段落之间要空一行
-- 每个要点都要独立成行
-- 重要概念要加粗显示
-- 数学公式使用普通文本格式，不要使用 LaTeX
-- 保持清晰的层级结构
-`);
-          }, 1000);
-        }
-      } catch (error) {
-        console.error('Error fetching knowledge point:', error);
-      }
-    }
-
-    fetchKnowledgePoint();
-  }, [knowledgePointId]);
-
-  // 调试路由参数
-  useEffect(() => {
-    console.log('Router query:', router.query);
-  }, [router.query]);
-
-  // 定义固定的输入参数
-  const currInputs = {
-    a: '主动型',
-    b: '苏格拉底式',
-    c: '鼓励',
-    d: '归纳',
-    e: '1/6 入门',
-  };
+  }, []);
 
   // 自动滚动到最新消息
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
+
+  console.log('messages', messages);
 
   // 处理 AI 消息
   const handleAIMessage = async (query: string | undefined) => {
@@ -701,8 +449,13 @@ export default function StudyPage() {
     setIsLoading(true);
 
     try {
+      const apiKey = process.env.NEXT_PUBLIC_DIFY_API_KEY_QUIZ
+      if (!apiKey) {
+        throw new Error('Quiz API key is not defined')
+      }
+
       const requestBody: any = {
-        inputs: currInputs,
+        inputs: {},
         query,
         user: 'user',
         response_mode: 'streaming',
@@ -718,7 +471,7 @@ export default function StudyPage() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIFY_API_KEY}`,
+            Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify(requestBody),
           signal: abortControllerRef.current.signal,
@@ -777,21 +530,25 @@ export default function StudyPage() {
                 conversationIdRef.current = data.conversation_id;
               }
 
-              if (data.event === 'agent_message') {
+              if (data.event === 'message') {
                 if (data.answer) {
-                  const cleanedMessage = cleanMessageContent(data.answer);
-                  accumulatedContent = cleanMessageContent(accumulatedContent + data.answer);
-                  console.log('accumulatedContent:', accumulatedContent);
-                  const { displayContent, instructions } = processMessageContent(accumulatedContent);
+                  accumulatedContent += data.answer;
+                  const { displayContent, instructions } =
+                    processMessageContent(accumulatedContent);
                   setMessages((prev) =>
                     prev.map((msg) =>
                       msg.id === pendingMessage.id
-                        ? { ...msg, pending: false, content: displayContent, instructions }
+                        ? {
+                            ...msg,
+                            content: displayContent,
+                            instructions,
+                            pending: false,
+                          }
                         : msg
                     )
                   );
                 }
-              } else if (data.event === 'agent_thought') {
+              } else if (data.event === 'thought') {
                 if (data.thought) {
                   console.log('Agent thought:', data.thought);
                 }
@@ -845,6 +602,7 @@ export default function StudyPage() {
       content: '',
       isUser: false,
       pending: true,
+      originalQuery: input.trim(),
     };
 
     setMessages((prev) => [...prev, userMessage, pendingMessage]);
@@ -852,8 +610,13 @@ export default function StudyPage() {
     setIsLoading(true);
 
     try {
+      const apiKey = process.env.NEXT_PUBLIC_DIFY_API_KEY_QUIZ
+      if (!apiKey) {
+        throw new Error('Quiz API key is not defined')
+      }
+
       const requestBody: any = {
-        inputs: currInputs,
+        inputs: {},
         query: input.trim(),
         user: 'user',
         response_mode: 'streaming',
@@ -869,7 +632,7 @@ export default function StudyPage() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${process.env.NEXT_PUBLIC_DIFY_API_KEY}`,
+            Authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify(requestBody),
           signal: abortControllerRef.current.signal,
@@ -902,14 +665,13 @@ export default function StudyPage() {
               
               // 使用更安全的方式解析 JSON
               const jsonStr = decodeURIComponent(escape(line.slice(6)));
-              console.log('jsonStr:', jsonStr);
               const data: ChatResponse = JSON.parse(jsonStr);
 
               // 处理错误事件
               if (data.event === 'error') {
                 setMessages((prev) =>
                   prev.map((msg) =>
-                    msg.pending
+                    msg.id === pendingMessage.id
                       ? {
                           ...msg,
                           content: '抱歉，消息处理失败，请重试。',
@@ -929,20 +691,25 @@ export default function StudyPage() {
                 conversationIdRef.current = data.conversation_id;
               }
 
-              if (data.event === 'agent_message') {
+              if (data.event === 'message') {
                 if (data.answer) {
-                  const cleanedMessage = cleanMessageContent(data.answer);
-                  accumulatedContent = cleanMessageContent(accumulatedContent + data.answer);
-                  const { displayContent, instructions } = processMessageContent(accumulatedContent);
+                  accumulatedContent += data.answer;
+                  const { displayContent, instructions } =
+                    processMessageContent(accumulatedContent);
                   setMessages((prev) =>
                     prev.map((msg) =>
                       msg.id === pendingMessage.id
-                        ? { ...msg, pending: false, content: displayContent, instructions }
+                        ? {
+                            ...msg,
+                            content: displayContent,
+                            instructions,
+                            pending: false,
+                          }
                         : msg
                     )
                   );
                 }
-              } else if (data.event === 'agent_thought') {
+              } else if (data.event === 'thought') {
                 if (data.thought) {
                   console.log('Agent thought:', data.thought);
                 }
@@ -965,7 +732,7 @@ export default function StudyPage() {
       console.error('发送消息失败:', error);
       setMessages((prev) =>
         prev.map((msg) =>
-          msg.pending
+          msg.id === pendingMessage.id
             ? {
                 ...msg,
                 content: '抱歉，发送消息失败，请稍后重试。',
@@ -996,7 +763,7 @@ export default function StudyPage() {
           <BackButton onClick={() => router.back()}>
             <ArrowLeft size={18} />
           </BackButton>
-          <Title>{title || 'AI学习助手'}</Title>
+          <Title>知识竞猜</Title>
         </Header>
 
         <ChatContainer ref={chatContainerRef}>
@@ -1028,9 +795,9 @@ export default function StudyPage() {
                           <RefreshCw /> 重新发送
                         </RetryButton>
                       )}
-                      {(message.instructions || message.hasSVG) && (
+                      {message.instructions && (
                         <InstructionButtons>
-                          {message.instructions?.map((instruction, index) => (
+                          {message.instructions.map((instruction, index) => (
                             <InstructionButton
                               key={index}
                               onClick={() => handleAIMessage(instruction.action)}
@@ -1038,13 +805,6 @@ export default function StudyPage() {
                               {instruction.text}
                             </InstructionButton>
                           ))}
-                          {message.hasSVG && (
-                            <InstructionButton
-                              onClick={() => handleAIMessage("图片有错误，请仔细检查并重新生成")}
-                            >
-                              图片不对
-                            </InstructionButton>
-                          )}
                         </InstructionButtons>
                       )}
                     </>
@@ -1076,3 +836,5 @@ export default function StudyPage() {
     </Layout>
   );
 }
+
+export default QuizPage; 

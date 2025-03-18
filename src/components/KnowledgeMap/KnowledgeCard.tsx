@@ -89,19 +89,19 @@ export const KnowledgeCard: React.FC<KnowledgeCardProps> = ({
 
   return (
     <StyledCard
-      $isUnlocked={knowledge.isUnlocked}
-      $isCompleted={knowledge.isCompleted}
+      $isUnlocked={knowledge.isUnlocked ?? false}
+      $isCompleted={knowledge.isCompleted ?? false}
       onClick={knowledge.isUnlocked ? onClick : undefined}
     >
-      <StyledTitle $isUnlocked={knowledge.isUnlocked}>
+      <StyledTitle $isUnlocked={knowledge.isUnlocked ?? false}>
         {knowledge.title}
       </StyledTitle>
-      <StyledDescription $isUnlocked={knowledge.isUnlocked}>
-        {knowledge.description}
+      <StyledDescription $isUnlocked={knowledge.isUnlocked ?? false}>
+        {knowledge.description ?? ''}
       </StyledDescription>
       <StyledStatus>
         <StyledBadge $type={getBadgeType()}>{getStatus()}</StyledBadge>
-        {knowledge.completionCount > 0 && (
+        {(knowledge.completionCount ?? 0) > 0 && (
           <span>完成次数: {knowledge.completionCount}</span>
         )}
       </StyledStatus>
