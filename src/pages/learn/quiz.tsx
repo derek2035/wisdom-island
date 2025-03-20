@@ -281,6 +281,92 @@ const InstructionButton = styled.button`
   }
 `;
 
+const OptionButtons = styled.div`
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+`;
+
+const OptionButton = styled.button<{ selected?: boolean; disabled?: boolean }>`
+  background: ${({ selected }) => 
+    selected ? 'rgba(79, 70, 229, 0.2)' : 'rgba(79, 70, 229, 0.1)'};
+  border: none;
+  color: #4F46E5;
+  padding: 6px 16px;
+  border-radius: 16px;
+  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
+  font-size: 14px;
+  font-weight: 500;
+  opacity: ${({ disabled, selected }) => (!disabled || selected ? 1 : 0.5)};
+  position: relative;
+
+  &:hover {
+    background: ${({ disabled, selected }) => 
+      disabled ? (selected ? 'rgba(79, 70, 229, 0.2)' : 'rgba(79, 70, 229, 0.1)') 
+      : 'rgba(79, 70, 229, 0.2)'};
+  }
+
+  ${({ selected }) => selected && `
+    // &::after {
+    //   content: '✓';
+    //   margin-left: 6px;
+    // }
+  `}
+`;
+
+const ResultContainer = styled.div`
+  display: flex;
+  align-items: stretch;
+  gap: 12px;
+  margin-top: 12px;
+`;
+
+const ResultMessage = styled.div<{ isCorrect: boolean }>`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  background: ${({ isCorrect }) => 
+    isCorrect ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'};
+  color: ${({ isCorrect }) => 
+    isCorrect ? '#059669' : '#DC2626'};
+  font-weight: 500;
+  font-size: 14px;
+
+  &::before {
+    content: '${({ isCorrect }) => 
+      isCorrect ? '✓' : '✕'}';
+    font-weight: bold;
+  }
+`;
+
+const NextButton = styled.button`
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(16, 185, 129, 0.1);
+  border: none;
+  color: #059669;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+
+  &:hover {
+    background: rgba(16, 185, 129, 0.2);
+    transform: translateY(-1px);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+`;
+
 interface Message {
   id: string;
   content: string;
@@ -288,7 +374,10 @@ interface Message {
   pending?: boolean;
   error?: boolean;
   instructions?: { text: string; action: string }[];
+  options?: string[] | null;
+  selectedOption?: string;
   originalQuery?: string;
+  result?: 'correct' | 'incorrect';
 }
 
 interface ChatResponse {
@@ -308,10 +397,12 @@ function cleanMessageContent(content: string) {
   return content;
 }
 
-// 处理消息内容，提取指令
+// 处理消息内容，提取指令和选项
 function processMessageContent(content: string): { 
   displayContent: string; 
-  instructions: { text: string; action: string }[] 
+  instructions: { text: string; action: string }[];
+  options: string[] | null;
+  result?: 'correct' | 'incorrect';
 } {
   const regex = /[\[【]((?:请继续|没看懂|我不会)(?:,(?:请继续|没看懂|我不会))*)[\]】]/g;
   const instructions: { text: string; action: string }[] = [];
@@ -319,7 +410,6 @@ function processMessageContent(content: string): {
   
   // 提取所有指令
   while ((match = regex.exec(content)) !== null) {
-    // 分割多个指令
     const actions = match[1].split(',');
     actions.forEach(action => {
       if (action.trim()) {
@@ -331,10 +421,33 @@ function processMessageContent(content: string): {
     });
   }
   
-  // 移除指令文本
-  const displayContent = content.replace(regex, '');
+  // 检查是否包含选择题选项提示
+  const optionsRegex = /请选择你的答案[（(](A\/B\/C\/D)[)）]：\s*$/;
+  const optionsMatch = content.match(optionsRegex);
+  let options = null;
+  let displayContent = content;
+
+  if (optionsMatch) {
+    options = ['A', 'B', 'C', 'D'];
+    // 移除选项提示文本
+    displayContent = content.replace(optionsRegex, '');
+  }
+
+  // 检查是否包含回答结果
+  let result: 'correct' | 'incorrect' | undefined;
+  const resultRegex = /\[(回答(?:正确|错误))\]\s*$/;
+  const resultMatch = displayContent.match(resultRegex);
   
-  return { displayContent, instructions };
+  if (resultMatch) {
+    result = resultMatch[1].includes('正确') ? 'correct' : 'incorrect';
+    // 移除结果文本
+    displayContent = displayContent.replace(resultRegex, '');
+  }
+  
+  // 移除指令文本
+  displayContent = displayContent.replace(regex, '');
+  
+  return { displayContent, instructions, options, result };
 }
 
 // 添加新的 memo 组件来处理消息内容
@@ -352,10 +465,8 @@ const MessageRenderer = memo(({ content, isUser, message }: {
     if (content !== contentRef.current) {
       contentRef.current = content;
       if (content.startsWith(displayContent)) {
-        // 如果新内容是在原有内容基础上追加的，继续从当前位置打字
         setIsComplete(false);
       } else {
-        // 如果是完全不同的内容，重置打字效果
         setDisplayContent('');
         setIsComplete(false);
       }
@@ -392,7 +503,9 @@ const MessageRenderer = memo(({ content, isUser, message }: {
       >
         {displayContent}
       </ReactMarkdown>
-     
+      {/* {!isComplete && (
+        <LoadingDots>继续输出中</LoadingDots>
+      )} */}
     </>
   );
 });
@@ -533,7 +646,7 @@ const QuizPage = () => {
               if (data.event === 'message') {
                 if (data.answer) {
                   accumulatedContent += data.answer;
-                  const { displayContent, instructions } =
+                  const { displayContent, instructions, options, result } =
                     processMessageContent(accumulatedContent);
                   setMessages((prev) =>
                     prev.map((msg) =>
@@ -542,6 +655,8 @@ const QuizPage = () => {
                             ...msg,
                             content: displayContent,
                             instructions,
+                            options,
+                            result,
                             pending: false,
                           }
                         : msg
@@ -694,7 +809,7 @@ const QuizPage = () => {
               if (data.event === 'message') {
                 if (data.answer) {
                   accumulatedContent += data.answer;
-                  const { displayContent, instructions } =
+                  const { displayContent, instructions, options, result } =
                     processMessageContent(accumulatedContent);
                   setMessages((prev) =>
                     prev.map((msg) =>
@@ -703,6 +818,8 @@ const QuizPage = () => {
                             ...msg,
                             content: displayContent,
                             instructions,
+                            options,
+                            result,
                             pending: false,
                           }
                         : msg
@@ -778,16 +895,18 @@ const QuizPage = () => {
                     <LoadingDots>正在思考</LoadingDots>
                   ) : (
                     <>
-                      <MessageRenderer 
-                        content={message.content} 
+                      <MessageRenderer
+                        content={message.content}
                         isUser={message.isUser}
                         message={message}
                       />
                       {message.error && message.originalQuery && (
-                        <RetryButton 
+                        <RetryButton
                           onClick={() => {
                             if (message.originalQuery) {
-                              setMessages(prev => prev.filter(msg => msg.id !== message.id));
+                              setMessages((prev) =>
+                                prev.filter((msg) => msg.id !== message.id)
+                              );
                               handleAIMessage(message.originalQuery);
                             }
                           }}
@@ -795,12 +914,62 @@ const QuizPage = () => {
                           <RefreshCw /> 重新发送
                         </RetryButton>
                       )}
+                      {message.result ? (
+                        <ResultContainer>
+                          <ResultMessage
+                            isCorrect={message.result === 'correct'}
+                          >
+                            {message.result === 'correct'
+                              ? '回答正确'
+                              : '回答错误'}
+                          </ResultMessage>
+                          <NextButton
+                            onClick={() => handleAIMessage('请出下一题')}
+                          >
+                            下一题
+                          </NextButton>
+                        </ResultContainer>
+                      ) : message.options ? (
+                        <OptionButtons>
+                          {message.options.map((option) => (
+                            <OptionButton
+                              key={option}
+                              onClick={() => {
+                                if (!message.selectedOption) {
+                                  handleAIMessage(option);
+                                  setMessages((prev) =>
+                                    prev.map((msg) =>
+                                      msg.id === message.id
+                                        ? { ...msg, selectedOption: option }
+                                        : msg
+                                    )
+                                  );
+                                }
+                              }}
+                              selected={message.selectedOption === option}
+                              disabled={!!message.selectedOption}
+                            >
+                              {option}
+                            </OptionButton>
+                          ))}
+                        </OptionButtons>
+                      ) : (
+                        message.isUser || <ResultContainer>
+                          <NextButton
+                            onClick={() => handleAIMessage('请出下一题')}
+                          >
+                            下一题
+                          </NextButton>
+                        </ResultContainer>
+                      )}
                       {message.instructions && (
                         <InstructionButtons>
                           {message.instructions.map((instruction, index) => (
                             <InstructionButton
                               key={index}
-                              onClick={() => handleAIMessage(instruction.action)}
+                              onClick={() =>
+                                handleAIMessage(instruction.action)
+                              }
                             >
                               {instruction.text}
                             </InstructionButton>
@@ -821,7 +990,7 @@ const QuizPage = () => {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder='输入提问或回答...'
+              placeholder='自由提问...'
               disabled={isLoading}
             />
             <SendButton
