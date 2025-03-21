@@ -32,7 +32,7 @@ jobs:
           echo NEXT_PUBLIC_APP_ID=${{ secrets.NEXT_PUBLIC_APP_ID }} >> .env
           echo NEXT_PUBLIC_WECHAT_APP_ID=${{ secrets.NEXT_PUBLIC_WECHAT_APP_ID }} >> .env
           echo WECHAT_APP_SECRET=${{ secrets.WECHAT_APP_SECRET }} >> .env
-          echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env
+          echo DATABASE_URL=mysql://${{ secrets.MYSQL_USER }}:${{ secrets.MYSQL_PASSWORD }}@${{ secrets.MYSQL_HOST }}:3306/${{ secrets.MYSQL_DATABASE }} >> .env
           echo MYSQL_HOST=${{ secrets.MYSQL_HOST }} >> .env
           echo MYSQL_USER=${{ secrets.MYSQL_USER }} >> .env
           echo MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} >> .env
