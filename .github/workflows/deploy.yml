@@ -42,7 +42,7 @@ jobs:
         run: npm run build
 
       - name: Zip artifact for deployment
-        run: zip -r release.zip .next package.json package-lock.json public next.config.js .env
+        run: zip -r release.zip .next package.json package-lock.json public next.config.js .env prisma
         
       - name: Deploy to Server
         uses: appleboy/scp-action@master
