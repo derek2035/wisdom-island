@@ -61,6 +61,7 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
             cd /root/wisdom-island
+            rm -rf .next
             unzip -o release.zip
             npm install --production
             pm2 restart wisdom-island || pm2 start npm --name "wisdom-island" -- start
