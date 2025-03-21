@@ -23,6 +23,21 @@ jobs:
       - name: Install dependencies
         run: npm install
 
+      - name: 创建 .env 文件
+        run: |
+        touch .env
+        echo NEXT_PUBLIC_DIFY_API_URL=${{ secrets.NEXT_PUBLIC_DIFY_API_URL }} >> .env
+        echo NEXT_PUBLIC_DIFY_API_KEY=${{ secrets.NEXT_PUBLIC_DIFY_API_KEY }} >> .env
+        echo NEXT_PUBLIC_DIFY_API_KEY_QUIZ=${{ secrets.NEXT_PUBLIC_DIFY_API_KEY_QUIZ }} >> .env
+        echo NEXT_PUBLIC_APP_ID=${{ secrets.NEXT_PUBLIC_APP_ID }} >> .env
+        echo NEXT_PUBLIC_WECHAT_APP_ID=${{ secrets.NEXT_PUBLIC_WECHAT_APP_ID }} >> .env
+        echo WECHAT_APP_SECRET=${{ secrets.WECHAT_APP_SECRET }} >> .env
+        echo MYSQL_HOST=${{ secrets.MYSQL_HOST }} >> .env
+        echo MYSQL_USER=${{ secrets.MYSQL_USER }} >> .env
+        echo MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} >> .env
+        echo MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} >> .env
+
+
       - name: Build project
         run: npm run build
 
