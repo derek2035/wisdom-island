@@ -64,4 +64,5 @@ jobs:
             rm -rf .next
             unzip -o release.zip
             npm install --production
+            prisma generate
             pm2 restart wisdom-island || pm2 start npm --name "wisdom-island" -- start
