@@ -32,6 +32,7 @@ jobs:
           echo NEXT_PUBLIC_APP_ID=${{ secrets.NEXT_PUBLIC_APP_ID }} >> .env
           echo NEXT_PUBLIC_WECHAT_APP_ID=${{ secrets.NEXT_PUBLIC_WECHAT_APP_ID }} >> .env
           echo WECHAT_APP_SECRET=${{ secrets.WECHAT_APP_SECRET }} >> .env
+          echo DATABASE_URL=${{ secrets.DATABASE_URL }} >> .env
           echo MYSQL_HOST=${{ secrets.MYSQL_HOST }} >> .env
           echo MYSQL_USER=${{ secrets.MYSQL_USER }} >> .env
           echo MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} >> .env
@@ -64,5 +65,5 @@ jobs:
             rm -rf .next
             unzip -o release.zip
             npm install --production
-            prisma generate
+             ./node_modules/.bin/prisma generate
             pm2 restart wisdom-island || pm2 start npm --name "wisdom-island" -- start
