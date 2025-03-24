@@ -290,7 +290,7 @@ const AskButton = styled.button`
 `;
 
 // 输入框包装器样式
-const InputWrapper = styled.div<{ expanded: boolean }>`
+const InputWrapper = styled.div<{ $expanded: boolean }>`
   display: flex;
   gap: 12px;
   align-items: center;
@@ -299,8 +299,8 @@ const InputWrapper = styled.div<{ expanded: boolean }>`
   border-radius: 12px;
   padding: 8px 16px;
   transition: all 0.3s ease;
-  opacity: ${({ expanded }) => (expanded ? 1 : 0)};
-  max-height: ${({ expanded }) => (expanded ? '200px' : '0')};
+  opacity: ${({ $expanded }) => ($expanded ? 1 : 0)};
+  max-height: ${({ $expanded }) => ($expanded ? '200px' : '0')};
   overflow: hidden;
 
   &:focus-within {
@@ -499,6 +499,17 @@ function cleanMessageContent(content: string) {
   return content;
 }
 
+function extractToArray(inputString: string) {
+  // 使用正则表达式匹配中文括号内连续的大写字母和斜杠
+  const match = inputString.match(/（([A-Z/]+)）/);
+  if (match) {
+    // 将匹配到的内容以斜杠拆分为数组
+    return match[1].split('/');
+  }
+  // 如果未匹配到，则返回空数组
+  return [];
+}
+
 // 处理消息内容，提取指令和选项
 function processMessageContent(content: string): {
   displayContent: string;
@@ -506,13 +517,13 @@ function processMessageContent(content: string): {
   result?: 'correct' | 'incorrect';
 } {
   // 检查是否包含选择题选项提示
-  const optionsRegex = /请选择你的答案[（(](A(\/[BCD]){1,3})[)）]：\s*$/;
+  const optionsRegex = /请选择你的答案[（(](A(\/[BCD]){0,3})[)）]：\s*$/;
   const optionsMatch = content.match(optionsRegex);
   let options = null;
   let displayContent = content;
 
   if (optionsMatch) {
-    options = ['A', 'B', 'C', 'D'];
+    options = extractToArray(content);
     // 移除选项提示文本
     displayContent = content.replace(optionsRegex, '');
   }
@@ -1092,7 +1103,7 @@ const QuizPage = () => {
           )}
           <InputArea expanded={isInputExpanded}>
             {isInputExpanded ? (
-              <InputWrapper expanded={isInputExpanded}>
+              <InputWrapper $expanded={isInputExpanded}>
                 <Input
                   ref={inputRef}
                   value={input}
