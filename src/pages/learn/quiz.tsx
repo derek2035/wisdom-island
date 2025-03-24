@@ -72,7 +72,8 @@ const Message = styled.div<{ isUser: boolean }>`
   display: flex;
   gap: 12px;
   align-items: flex-start;
-  justify-content: ${({ isUser }) => (isUser ? 'flex-end' : 'flex-start')}; // 用户消息靠右，AI消息靠左
+  justify-content: ${({ isUser }) =>
+    isUser ? 'flex-end' : 'flex-start'}; // 用户消息靠右，AI消息靠左
 `;
 
 // 头像样式
@@ -80,7 +81,8 @@ const Avatar = styled.div<{ isUser: boolean }>`
   width: 36px;
   height: 36px;
   border-radius: 18px;
-  background: ${({ isUser }) => (isUser ? '#4F46E5' : '#10B981')}; // 用户和AI不同的头像背景色
+  background: ${({ isUser }) =>
+    isUser ? '#4F46E5' : '#10B981'}; // 用户和AI不同的头像背景色
   display: flex;
   align-items: center;
   justify-content: center;
@@ -113,7 +115,8 @@ const LoadingDots = styled.span`
 
 // 消息内容样式
 const MessageContent = styled.div<{ isUser: boolean }>`
-  background: ${({ isUser }) => (isUser ? '#4F46E5' : '#F3F4F6')}; // 用户和AI不同的消息背景色
+  background: ${({ isUser }) =>
+    isUser ? '#4F46E5' : '#F3F4F6'}; // 用户和AI不同的消息背景色
   color: ${({ isUser }) => (isUser ? 'white' : '#111827')};
   padding: 12px 12px;
   border-radius: 12px;
@@ -246,7 +249,7 @@ const CorrectStat = styled(StatItem)`
 
 // 错误答题统计样式
 const IncorrectStat = styled(StatItem)`
-  color: #DC2626;
+  color: #dc2626;
   &:before {
     content: '❌';
   }
@@ -256,15 +259,17 @@ const IncorrectStat = styled(StatItem)`
 const InputArea = styled.div<{ expanded: boolean }>`
   flex: 1;
   transition: all 0.3s ease;
-  
-  ${({ expanded }) => !expanded && `
+
+  ${({ expanded }) =>
+    !expanded &&
+    `
     flex: 0;
   `}
 `;
 
 // 提问按钮样式
 const AskButton = styled.button`
-  background: #4F46E5;
+  background: #4f46e5;
   color: white;
   border: none;
   padding: 8px 16px;
@@ -275,7 +280,7 @@ const AskButton = styled.button`
   transition: all 0.2s ease;
   width: max-content;
   &:hover {
-    background: #4338CA;
+    background: #4338ca;
     transform: translateY(-1px);
   }
 
@@ -294,8 +299,8 @@ const InputWrapper = styled.div<{ expanded: boolean }>`
   border-radius: 12px;
   padding: 8px 16px;
   transition: all 0.3s ease;
-  opacity: ${({ expanded }) => expanded ? 1 : 0};
-  max-height: ${({ expanded }) => expanded ? '200px' : '0'};
+  opacity: ${({ expanded }) => (expanded ? 1 : 0)};
+  max-height: ${({ expanded }) => (expanded ? '200px' : '0')};
   overflow: hidden;
 
   &:focus-within {
@@ -319,19 +324,19 @@ const Input = styled.input`
 `;
 
 // 发送按钮样式
-const SendButton = styled.button<{ disabled: boolean }>`
+const SendButton = styled.button<{ $disabled: boolean }>`
   background: none;
   border: none;
   padding: 8px;
-  cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
-  color: ${({ disabled }) => (disabled ? '#9CA3AF' : '#4F46E5')};
+  cursor: ${({ $disabled }) => ($disabled ? 'not-allowed' : 'pointer')};
+  color: ${({ $disabled }) => ($disabled ? '#9CA3AF' : '#4F46E5')};
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
 
   &:hover {
-    background: ${({ disabled }) => (disabled ? 'none' : '#F3F4F6')};
+    background: ${({ $disabled }) => ($disabled ? 'none' : '#F3F4F6')};
   }
 `;
 
@@ -342,7 +347,7 @@ const RetryButton = styled.button`
   gap: 4px;
   background: none;
   border: none;
-  color: #4F46E5;
+  color: #4f46e5;
   padding: 4px 8px;
   border-radius: 4px;
   cursor: pointer;
@@ -366,7 +371,7 @@ const InstructionButtons = styled.div`
 const InstructionButton = styled.button`
   background: rgba(79, 70, 229, 0.1);
   border: none;
-  color: #4F46E5;
+  color: #4f46e5;
   padding: 4px 12px;
   border-radius: 16px;
   cursor: pointer;
@@ -387,10 +392,10 @@ const OptionButtons = styled.div`
 
 // 选项按钮样式
 const OptionButton = styled.button<{ selected?: boolean; disabled?: boolean }>`
-  background: ${({ selected }) => 
+  background: ${({ selected }) =>
     selected ? 'rgba(79, 70, 229, 0.2)' : 'rgba(79, 70, 229, 0.1)'};
   border: none;
-  color: #4F46E5;
+  color: #4f46e5;
   padding: 6px 16px;
   border-radius: 16px;
   cursor: ${({ disabled }) => (disabled ? 'not-allowed' : 'pointer')};
@@ -400,9 +405,12 @@ const OptionButton = styled.button<{ selected?: boolean; disabled?: boolean }>`
   position: relative;
 
   &:hover {
-    background: ${({ disabled, selected }) => 
-      disabled ? (selected ? 'rgba(79, 70, 229, 0.2)' : 'rgba(79, 70, 229, 0.1)') 
-      : 'rgba(79, 70, 229, 0.2)'};
+    background: ${({ disabled, selected }) =>
+      disabled
+        ? selected
+          ? 'rgba(79, 70, 229, 0.2)'
+          : 'rgba(79, 70, 229, 0.1)'
+        : 'rgba(79, 70, 229, 0.2)'};
   }
 `;
 
@@ -421,16 +429,14 @@ const ResultMessage = styled.div<{ isCorrect: boolean }>`
   gap: 8px;
   padding: 8px 16px;
   border-radius: 8px;
-  background: ${({ isCorrect }) => 
+  background: ${({ isCorrect }) =>
     isCorrect ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)'};
-  color: ${({ isCorrect }) => 
-    isCorrect ? '#059669' : '#DC2626'};
+  color: ${({ isCorrect }) => (isCorrect ? '#059669' : '#DC2626')};
   font-weight: 500;
   font-size: 14px;
 
   &::before {
-    content: '${({ isCorrect }) => 
-      isCorrect ? '✓' : '✕'}';
+    content: '${({ isCorrect }) => (isCorrect ? '✓' : '✕')}';
     font-weight: bold;
   }
 `;
@@ -463,29 +469,29 @@ const NextButton = styled.button`
 
 // 消息接口定义
 interface Message {
-  id: string;          // 消息唯一标识
-  content: string;     // 消息内容
-  isUser: boolean;     // 是否为用户消息
-  pending?: boolean;   // 是否为等待中的消息
-  error?: boolean;     // 是否存在错误
-  instructions?: { text: string; action: string }[];  // 指令按钮配置
-  options?: string[] | null;  // 选项按钮配置
-  selectedOption?: string;    // 已选择的选项
-  originalQuery?: string;     // 原始查询内容
-  result?: 'correct' | 'incorrect';  // 答题结果
+  id: string; // 消息唯一标识
+  content: string; // 消息内容
+  isUser: boolean; // 是否为用户消息
+  pending?: boolean; // 是否为等待中的消息
+  error?: boolean; // 是否存在错误
+  instructions?: { text: string; action: string }[]; // 指令按钮配置
+  options?: string[] | null; // 选项按钮配置
+  selectedOption?: string; // 已选择的选项
+  originalQuery?: string; // 原始查询内容
+  result?: 'correct' | 'incorrect'; // 答题结果
 }
 
 // 聊天响应接口定义
 interface ChatResponse {
-  conversation_id?: string;   // 对话ID
-  message_id?: string;       // 消息ID
-  event?: 'message_end' | 'message' | 'thought' | string;  // 事件类型
-  answer?: string;           // 回答内容
-  thought?: string;          // 思考过程
-  observation?: string;      // 观察结果
-  tool?: string;            // 使用的工具
-  tool_input?: string;      // 工具输入
-  message_files?: any[];    // 消息附件
+  conversation_id?: string; // 对话ID
+  message_id?: string; // 消息ID
+  event?: 'message_end' | 'message' | 'thought' | string; // 事件类型
+  answer?: string; // 回答内容
+  thought?: string; // 思考过程
+  observation?: string; // 观察结果
+  tool?: string; // 使用的工具
+  tool_input?: string; // 工具输入
+  message_files?: any[]; // 消息附件
 }
 
 // 清理消息内容，移除 XML 标签
@@ -494,14 +500,13 @@ function cleanMessageContent(content: string) {
 }
 
 // 处理消息内容，提取指令和选项
-function processMessageContent(content: string): { 
-  displayContent: string; 
+function processMessageContent(content: string): {
+  displayContent: string;
   options: string[] | null;
   result?: 'correct' | 'incorrect';
 } {
-  
   // 检查是否包含选择题选项提示
-  const optionsRegex = /请选择你的答案[（(](A\/B\/C\/D)[)）]：\s*$/;
+  const optionsRegex = /请选择你的答案[（(](A(\/[BCD]){1,3})[)）]：\s*$/;
   const optionsMatch = content.match(optionsRegex);
   let options = null;
   let displayContent = content;
@@ -516,60 +521,65 @@ function processMessageContent(content: string): {
   let result: 'correct' | 'incorrect' | undefined;
   const resultRegex = /\[(回答(?:正确|错误))\]\s*$/;
   const resultMatch = displayContent.match(resultRegex);
-  
+
   if (resultMatch) {
     result = resultMatch[1].includes('正确') ? 'correct' : 'incorrect';
     // 移除结果文本
     displayContent = displayContent.replace(resultRegex, '');
   }
-  
-  
+
   return { displayContent, options, result };
 }
 
 // 消息渲染组件（使用 memo 优化性能）
-const MessageRenderer = memo(({ content, isUser, message }: { 
-  content: string; 
-  isUser: boolean;
-  message: Message;
-}) => {
-  // 渲染 Markdown 内容
-  return (
-    <>
-      <ReactMarkdown
-        remarkPlugins={[remarkGfm]}
-        components={{
-          pre: ({ node, children, ...props }) => {
-            return <pre {...props}>{children}</pre>;
-          },
-          code: ({ className, children, ...props }) => {
-            return (
-              <code className={className} {...props}>
-                {children}
-              </code>
-            );
-          },
-        }}
-      >
-        {content}
-      </ReactMarkdown>
-    </>
-  );
-});
+const MessageRenderer = memo(
+  ({
+    content,
+    isUser,
+    message,
+  }: {
+    content: string;
+    isUser: boolean;
+    message: Message;
+  }) => {
+    // 渲染 Markdown 内容
+    return (
+      <>
+        <ReactMarkdown
+          remarkPlugins={[remarkGfm]}
+          components={{
+            pre: ({ node, children, ...props }) => {
+              return <pre {...props}>{children}</pre>;
+            },
+            code: ({ className, children, ...props }) => {
+              return (
+                <code className={className} {...props}>
+                  {children}
+                </code>
+              );
+            },
+          }}
+        >
+          {content}
+        </ReactMarkdown>
+      </>
+    );
+  }
+);
 
 // 知识竞猜页面组件
 const QuizPage = () => {
-  const router = useRouter();  // Next.js 路由
-  const [messages, setMessages] = useState<Message[]>([]);  // 消息列表状态
-  const [input, setInput] = useState('');                   // 输入框状态
-  const [isLoading, setIsLoading] = useState(false);        // 加载状态
+  const router = useRouter(); // Next.js 路由
+  const [messages, setMessages] = useState<Message[]>([]); // 消息列表状态
+  const [input, setInput] = useState(''); // 输入框状态
+  const [isLoading, setIsLoading] = useState(false); // 加载状态
   const [isInputExpanded, setIsInputExpanded] = useState(false);
   const [stats, setStats] = useState({ correct: 0, incorrect: 0 });
-  const chatContainerRef = useRef<HTMLDivElement>(null);    // 聊天容器引用
+  const chatContainerRef = useRef<HTMLDivElement>(null); // 聊天容器引用
   const inputRef = useRef<HTMLInputElement>(null);
-  const abortControllerRef = useRef<AbortController>(new AbortController());  // 请求中断控制器
-  const conversationIdRef = useRef<string>('');             // 对话ID引用
-  const initialMessageSentRef = useRef(false);              // 初始消息发送标记
+  const abortControllerRef = useRef<AbortController>(new AbortController()); // 请求中断控制器
+  const conversationIdRef = useRef<string>(''); // 对话ID引用
+  const initialMessageSentRef = useRef(false); // 初始消息发送标记
 
   // 初始化欢迎消息和第一个问题
   useEffect(() => {
@@ -583,14 +593,17 @@ const QuizPage = () => {
   // 自动滚动到最新消息
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop =
+        chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
   // 更新答题统计
   useEffect(() => {
-    const correct = messages.filter(msg => msg.result === 'correct').length;
-    const incorrect = messages.filter(msg => msg.result === 'incorrect').length;
+    const correct = messages.filter((msg) => msg.result === 'correct').length;
+    const incorrect = messages.filter(
+      (msg) => msg.result === 'incorrect'
+    ).length;
     setStats({ correct, incorrect });
   }, [messages]);
 
@@ -613,9 +626,9 @@ const QuizPage = () => {
 
     try {
       // 获取 API 密钥
-      const apiKey = process.env.NEXT_PUBLIC_DIFY_API_KEY_QUIZ
+      const apiKey = process.env.NEXT_PUBLIC_DIFY_API_KEY_QUIZ;
       if (!apiKey) {
-        throw new Error('Quiz API key is not defined')
+        throw new Error('Quiz API key is not defined');
       }
 
       // 准备请求体
@@ -654,7 +667,7 @@ const QuizPage = () => {
       const reader = response.body?.getReader();
       if (!reader) throw new Error('No reader available');
 
-      let accumulatedContent = '';  // 累积的消息内容
+      let accumulatedContent = ''; // 累积的消息内容
 
       // 处理流式响应
       while (true) {
@@ -670,7 +683,7 @@ const QuizPage = () => {
             try {
               // 忽略 ping 事件
               if (line.includes('"event":"ping"')) continue;
-              
+
               // 解析 JSON 数据
               const jsonStr = decodeURIComponent(escape(line.slice(6)));
               const data: ChatResponse = JSON.parse(jsonStr);
@@ -686,7 +699,7 @@ const QuizPage = () => {
                           isUser: false,
                           error: true,
                           originalQuery: query,
-                          pending: false
+                          pending: false,
                         }
                       : msg
                   )
@@ -753,7 +766,7 @@ const QuizPage = () => {
                 isUser: false,
                 error: true,
                 originalQuery: query,
-                pending: false
+                pending: false,
               }
             : msg
         )
@@ -789,9 +802,9 @@ const QuizPage = () => {
 
     try {
       // 获取 API 密钥
-      const apiKey = process.env.NEXT_PUBLIC_DIFY_API_KEY_QUIZ
+      const apiKey = process.env.NEXT_PUBLIC_DIFY_API_KEY_QUIZ;
       if (!apiKey) {
-        throw new Error('Quiz API key is not defined')
+        throw new Error('Quiz API key is not defined');
       }
 
       // 准备请求体
@@ -845,7 +858,7 @@ const QuizPage = () => {
             try {
               // 忽略 ping 事件
               if (line.includes('"event":"ping"')) continue;
-              
+
               // 解析 JSON 数据
               const jsonStr = decodeURIComponent(escape(line.slice(6)));
               const data: ChatResponse = JSON.parse(jsonStr);
@@ -861,7 +874,7 @@ const QuizPage = () => {
                           isUser: false,
                           error: true,
                           originalQuery: input.trim(),
-                          pending: false
+                          pending: false,
                         }
                       : msg
                   )
@@ -925,7 +938,7 @@ const QuizPage = () => {
                 isUser: false,
                 error: true,
                 originalQuery: input.trim(),
-                pending: false
+                pending: false,
               }
             : msg
         )
@@ -940,6 +953,7 @@ const QuizPage = () => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSendMessage();
+      setIsInputExpanded(false);
     }
   };
 
@@ -1068,11 +1082,14 @@ const QuizPage = () => {
 
         {/* 输入框区域 */}
         <InputContainer>
-          <StatsContainer>
-            {stats.correct > 0 && <CorrectStat>{stats.correct}</CorrectStat>}
-            {stats.incorrect > 0 && <IncorrectStat>{stats.incorrect}</IncorrectStat>} 
-          </StatsContainer>
-
+          {isInputExpanded || (
+            <StatsContainer>
+              {stats.correct > 0 && <CorrectStat>{stats.correct}</CorrectStat>}
+              {stats.incorrect > 0 && (
+                <IncorrectStat>{stats.incorrect}</IncorrectStat>
+              )}
+            </StatsContainer>
+          )}
           <InputArea expanded={isInputExpanded}>
             {isInputExpanded ? (
               <InputWrapper expanded={isInputExpanded}>
@@ -1087,7 +1104,7 @@ const QuizPage = () => {
                 />
                 <SendButton
                   onClick={handleSendMessage}
-                  disabled={!input.trim() || isLoading}
+                  $disabled={!input.trim() || isLoading}
                 >
                   <Send size={20} />
                 </SendButton>
@@ -1100,6 +1117,6 @@ const QuizPage = () => {
       </StyledContainer>
     </Layout>
   );
-}
+};
 
-export default QuizPage; 
+export default QuizPage;
