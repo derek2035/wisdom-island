@@ -53,7 +53,7 @@ const Navigation = () => {
         <StyledIcon>🏰</StyledIcon>
         <span>城堡</span>
       </NavItem>
-      <NavItem $active={router.pathname === '/profile'} onClick={() => navigate('/profile')}>
+      <NavItem $active={router.pathname === '/my'} onClick={() => navigate('/my')}>
         <StyledIcon>👤</StyledIcon>
         <span>我的</span>
       </NavItem>

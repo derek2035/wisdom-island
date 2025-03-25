@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef, useMemo, memo } from 'react';
+import { useEffect, useState, useRef, useMemo, memo, useCallback } from 'react';
 import { useRouter } from 'next/router';
 import styled, { keyframes } from 'styled-components';
 import { Layout } from '@/components/Layout';
@@ -584,6 +584,7 @@ const QuizPage = () => {
   const [messages, setMessages] = useState<Message[]>([]); // 消息列表状态
   const [input, setInput] = useState(''); // 输入框状态
   const [isLoading, setIsLoading] = useState(false); // 加载状态
+  const [user, setUser] = useState<{ id: string } | null>(null); // 当前登录的用户信息
   const [isInputExpanded, setIsInputExpanded] = useState(false);
   const [stats, setStats] = useState({ correct: 0, incorrect: 0 });
   const chatContainerRef = useRef<HTMLDivElement>(null); // 聊天容器引用
@@ -592,14 +593,30 @@ const QuizPage = () => {
   const conversationIdRef = useRef<string>(''); // 对话ID引用
   const initialMessageSentRef = useRef(false); // 初始消息发送标记
 
-  // 初始化欢迎消息和第一个问题
   useEffect(() => {
-    if (messages.length === 0 && !initialMessageSentRef.current) {
-      initialMessageSentRef.current = true;
-      // 发送初始消息给 AI
-      handleAIMessage('请开始出题');
+    if (typeof window !== 'undefined') {
+      const user = JSON.parse(window.localStorage.getItem('user') || '{}');
+      setUser(user);
+      const conversationId = window.localStorage.getItem('conversationId');
+      if (conversationId) {
+        conversationIdRef.current = conversationId;
+      }
     }
   }, []);
+
+  // 初始化欢迎消息和第一个问题
+  useEffect(() => {
+    if (user && messages.length === 0 && !initialMessageSentRef.current) {
+      initialMessageSentRef.current = true;
+      handleAIMessage('请开始出题');
+    }
+  }, [user]);
+
+  useEffect(() => {
+    if (conversationIdRef.current) {
+      window.localStorage.setItem('conversationId', conversationIdRef.current);
+    }
+  }, [conversationIdRef.current]);
 
   // 自动滚动到最新消息
   useEffect(() => {
@@ -619,173 +636,179 @@ const QuizPage = () => {
   }, [messages]);
 
   // 处理 AI 消息
-  const handleAIMessage = async (query: string | undefined) => {
-    if (isLoading || !query) return;
-
-    // 创建待处理消息
-    const pendingMessage = {
-      id: Date.now().toString(),
-      content: '',
-      isUser: false,
-      pending: true,
-      originalQuery: query,
-    };
-
-    // 添加消息到列表
-    setMessages((prev) => [...prev, pendingMessage]);
-    setIsLoading(true);
-
-    try {
-      // 获取 API 密钥
-      const apiKey = process.env.NEXT_PUBLIC_DIFY_API_KEY_QUIZ;
-      if (!apiKey) {
-        throw new Error('Quiz API key is not defined');
-      }
-
-      // 准备请求体
-      const requestBody: any = {
-        inputs: {},
-        query,
-        user: 'user',
-        response_mode: 'streaming',
+  const handleAIMessage = useCallback(
+    async (query: string | undefined) => {
+      if (isLoading || !query) return;
+      console.log('user666', user);
+      // 创建待处理消息
+      const pendingMessage = {
+        id: Date.now().toString(),
+        content: '',
+        isUser: false,
+        pending: true,
+        originalQuery: query,
       };
 
-      // 如果存在对话ID，添加到请求中
-      if (conversationIdRef.current) {
-        requestBody.conversation_id = conversationIdRef.current;
-      }
+      // 添加消息到列表
+      setMessages((prev) => [...prev, pendingMessage]);
+      setIsLoading(true);
 
-      // 发送请求
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_DIFY_API_URL}/chat-messages`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${apiKey}`,
-          },
-          body: JSON.stringify(requestBody),
-          signal: abortControllerRef.current.signal,
+      try {
+        // 获取 API 密钥
+        const apiKey = process.env.NEXT_PUBLIC_DIFY_API_KEY_QUIZ;
+        if (!apiKey) {
+          throw new Error('Quiz API key is not defined');
         }
-      );
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'API request failed');
-      }
+        // 准备请求体
+        const requestBody: any = {
+          inputs: {
+            timestamp: new Date().toISOString(),
+            random_number: Math.floor(Math.random() * 1000000),
+          },
+          query,
+          user: user?.id as string,
+          response_mode: 'streaming',
+        };
+        console.log('requestBody', requestBody);
+        // 如果存在对话ID，添加到请求中
+        if (conversationIdRef.current) {
+          requestBody.conversation_id = conversationIdRef.current;
+        }
 
-      // 获取响应流
-      const reader = response.body?.getReader();
-      if (!reader) throw new Error('No reader available');
+        // 发送请求
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_DIFY_API_URL}/chat-messages`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: `Bearer ${apiKey}`,
+            },
+            body: JSON.stringify(requestBody),
+            signal: abortControllerRef.current.signal,
+          }
+        );
 
-      let accumulatedContent = ''; // 累积的消息内容
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'API request failed');
+        }
 
-      // 处理流式响应
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
+        // 获取响应流
+        const reader = response.body?.getReader();
+        if (!reader) throw new Error('No reader available');
 
-        const chunk = new TextDecoder().decode(value);
-        const lines = chunk.split('\n');
+        let accumulatedContent = ''; // 累积的消息内容
 
-        for (const line of lines) {
-          if (line.trim() === '') continue;
-          if (line.startsWith('data: ')) {
-            try {
-              // 忽略 ping 事件
-              if (line.includes('"event":"ping"')) continue;
+        // 处理流式响应
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
 
-              // 解析 JSON 数据
-              const jsonStr = decodeURIComponent(escape(line.slice(6)));
-              const data: ChatResponse = JSON.parse(jsonStr);
+          const chunk = new TextDecoder().decode(value);
+          const lines = chunk.split('\n');
 
-              // 处理错误事件
-              if (data.event === 'error') {
-                setMessages((prev) =>
-                  prev.map((msg) =>
-                    msg.id === pendingMessage.id
-                      ? {
-                          ...msg,
-                          content: '抱歉，消息处理失败，请重试。',
-                          isUser: false,
-                          error: true,
-                          originalQuery: query,
-                          pending: false,
-                        }
-                      : msg
-                  )
-                );
-                setIsLoading(false);
-                break;
-              }
+          for (const line of lines) {
+            if (line.trim() === '') continue;
+            if (line.startsWith('data: ')) {
+              try {
+                // 忽略 ping 事件
+                if (line.includes('"event":"ping"')) continue;
 
-              // 保存对话ID
-              if (data.conversation_id && !conversationIdRef.current) {
-                conversationIdRef.current = data.conversation_id;
-              }
+                // 解析 JSON 数据
+                const jsonStr = decodeURIComponent(escape(line.slice(6)));
+                const data: ChatResponse = JSON.parse(jsonStr);
 
-              // 处理消息事件
-              if (data.event === 'message') {
-                if (data.answer) {
-                  accumulatedContent += data.answer;
-                  const { displayContent, options, result } =
-                    processMessageContent(accumulatedContent);
+                // 处理错误事件
+                if (data.event === 'error') {
                   setMessages((prev) =>
                     prev.map((msg) =>
                       msg.id === pendingMessage.id
                         ? {
                             ...msg,
-                            content: displayContent,
-                            options,
-                            result,
+                            content: '抱歉，消息处理失败，请重试。',
+                            isUser: false,
+                            error: true,
+                            originalQuery: query,
                             pending: false,
                           }
                         : msg
                     )
                   );
+                  setIsLoading(false);
+                  break;
                 }
-              } else if (data.event === 'thought') {
-                // 记录 AI 思考过程
-                if (data.thought) {
-                  console.log('Agent thought:', data.thought);
+
+                // 保存对话ID
+                if (data.conversation_id && !conversationIdRef.current) {
+                  conversationIdRef.current = data.conversation_id;
                 }
-              } else if (data.event === 'message_end') {
-                setIsLoading(false);
-                break;
+
+                // 处理消息事件
+                if (data.event === 'message') {
+                  if (data.answer) {
+                    accumulatedContent += data.answer;
+                    const { displayContent, options, result } =
+                      processMessageContent(accumulatedContent);
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === pendingMessage.id
+                          ? {
+                              ...msg,
+                              content: displayContent,
+                              options,
+                              result,
+                              pending: false,
+                            }
+                          : msg
+                      )
+                    );
+                  }
+                } else if (data.event === 'thought') {
+                  // 记录 AI 思考过程
+                  if (data.thought) {
+                    console.log('Agent thought:', data.thought);
+                  }
+                } else if (data.event === 'message_end') {
+                  setIsLoading(false);
+                  break;
+                }
+              } catch (e) {
+                console.error('Error parsing SSE data:', e);
               }
-            } catch (e) {
-              console.error('Error parsing SSE data:', e);
             }
           }
         }
-      }
-    } catch (error: any) {
-      // 处理请求中断
-      if (error.name === 'AbortError') {
-        console.log('Request aborted');
-        return;
-      }
+      } catch (error: any) {
+        // 处理请求中断
+        if (error.name === 'AbortError') {
+          console.log('Request aborted');
+          return;
+        }
 
-      // 处理其他错误
-      console.error('发送消息失败:', error);
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === pendingMessage.id
-            ? {
-                ...msg,
-                content: '抱歉，发送消息失败，请稍后重试。',
-                isUser: false,
-                error: true,
-                originalQuery: query,
-                pending: false,
-              }
-            : msg
-        )
-      );
-    } finally {
-      setIsLoading(false);
-    }
-  };
+        // 处理其他错误
+        console.error('发送消息失败:', error);
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === pendingMessage.id
+              ? {
+                  ...msg,
+                  content: '抱歉，发送消息失败，请稍后重试。',
+                  isUser: false,
+                  error: true,
+                  originalQuery: query,
+                  pending: false,
+                }
+              : msg
+          )
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [user]
+  );
 
   // 处理用户发送消息
   const handleSendMessage = async () => {
@@ -820,9 +843,12 @@ const QuizPage = () => {
 
       // 准备请求体
       const requestBody: any = {
-        inputs: {},
+        inputs: {
+          timestamp: new Date().toISOString(),
+          random_number: Math.floor(Math.random() * 1000000),
+        },
         query: input.trim(),
-        user: 'user',
+        user: user?.id as string,
         response_mode: 'streaming',
       };
 

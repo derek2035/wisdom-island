@@ -76,7 +76,7 @@ const ProfilePage: React.FC = () => {
 
   React.useEffect(() => {
     if (!isAuthenticated) {
-      router.push('/login')
+      router.push('/my')
     }
   }, [isAuthenticated, router])
 
