@@ -118,7 +118,7 @@ const MessageContent = styled.div<{ isUser: boolean }>`
   background: ${({ isUser }) =>
     isUser ? '#4F46E5' : '#F3F4F6'}; // 用户和AI不同的消息背景色
   color: ${({ isUser }) => (isUser ? 'white' : '#111827')};
-  padding: 12px 12px;
+  padding: 12px 16px;
   border-radius: 12px;
   border-bottom-left-radius: ${({ isUser }) => (isUser ? '12px' : '4px')};
   border-bottom-right-radius: ${({ isUser }) => (isUser ? '4px' : '12px')};
@@ -138,7 +138,7 @@ const MessageContent = styled.div<{ isUser: boolean }>`
   & h1 {
     font-size: 16px;
     font-weight: 500;
-    margin: 0 0 1em 0;
+    margin: 1em 0;
     padding-bottom: 0.5em;
     border-bottom: 1px solid
       ${({ isUser }) =>
@@ -148,15 +148,12 @@ const MessageContent = styled.div<{ isUser: boolean }>`
   & h2 {
     font-size: 1em;
     font-weight: 600;
-    margin: 1.5em 0 1em 0;
+    margin: 1em 0;
     color: ${({ isUser }) => (isUser ? 'white' : '#374151')};
-  }
-  & h2:first-of-type {
-    margin-top: 0;
   }
 
   & p {
-    margin: 0 0 1em 0;
+    margin: 0.5em 0;
     padding: 0;
   }
 
@@ -167,45 +164,61 @@ const MessageContent = styled.div<{ isUser: boolean }>`
 
   // 有序列表样式
   & ol {
-    counter-reset: item;
     list-style-type: none;
-    padding-left: 0;
-    margin: 0 0 1em 0;
+    margin: 0.5em 0;
   }
 
   & ol li {
-    counter-increment: item;
-    margin: 0 0 0.8em 0;
-    display: flex;
-    gap: 8px;
-    align-items: flex-start;
-  }
-
-  & ol li::before {
-    content: counter(item) '.';
-    font-weight: 600;
-    min-width: 1.5em;
-    margin-right: 4px;
+    margin: 0.3em 0;
   }
 
   // 无序列表样式
   & ul {
-    list-style-type: disc;
+    list-style-type: none;
     padding-left: 1.5em;
-    margin: 0 0 1em 0;
+    margin: 0.5em 0;
   }
 
   & ul li {
-    margin: 0 0 0.5em 0;
+    margin: 0.3em 0;
+    position: relative;
   }
 
-  & ul li:last-child,
-  & ol li:last-child {
-    margin-bottom: 0;
+  & ul li::before {
+    content: "•";
+    position: absolute;
+    left: -1em;
+    color: ${({ isUser }) => (isUser ? 'white' : '#111827')};
+  }
+
+  & > *:first-child {
+    margin-top: 0;
   }
 
   & > *:last-child {
     margin-bottom: 0;
+  }
+
+  // 表格样式
+  & table {
+    width: 100%;
+    margin: 1em 0;
+    border-collapse: collapse;
+    color: ${({ isUser }) => (isUser ? 'white' : '#111827')};
+  }
+
+  & th,
+  & td {
+    border: 1px solid ${({ isUser }) =>
+      isUser ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)'};
+    padding: 8px;
+    text-align: left;
+  }
+
+  & th {
+    background: ${({ isUser }) =>
+      isUser ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)'};
+    font-weight: 600;
   }
 `;
 
@@ -517,7 +530,7 @@ function processMessageContent(content: string): {
   result?: 'correct' | 'incorrect';
 } {
   // 检查是否包含选择题选项提示
-  const optionsRegex = /请选择你的答案[（(](A(\/[BCD]){0,3})[)）]：\s*$/;
+  const optionsRegex = /请选择.*?[（(](A(\/[BCD]){0,3})[)）]：\s*/;
   const optionsMatch = content.match(optionsRegex);
   let options = null;
   let displayContent = content;
@@ -530,11 +543,11 @@ function processMessageContent(content: string): {
 
   // 检查是否包含回答结果
   let result: 'correct' | 'incorrect' | undefined;
-  const resultRegex = /\[(回答(?:正确|错误))\]\s*$/;
+  const resultRegex = /\[(回答(?:正确|部分正确|错误)).*?\]\s*/;
   const resultMatch = displayContent.match(resultRegex);
 
   if (resultMatch) {
-    result = resultMatch[1].includes('正确') ? 'correct' : 'incorrect';
+    result = resultMatch[1].includes('错误') ? 'incorrect': 'correct';
     // 移除结果文本
     displayContent = displayContent.replace(resultRegex, '');
   }
@@ -559,8 +572,16 @@ const MessageRenderer = memo(
         <ReactMarkdown
           remarkPlugins={[remarkGfm]}
           components={{
+            p: ({ children }) => {
+              return <p style={{ margin: '0.5em 0' }}>{children}</p>;
+            },
+            hr: () => <hr style={{ margin: '1em 0', border: 'none', borderTop: '1px solid #ddd' }} />,
             pre: ({ node, children, ...props }) => {
-              return <pre {...props}>{children}</pre>;
+              return (
+                <p style={{ margin: '0.5em 0' }}>
+                  {children}
+                </p>
+              );
             },
             code: ({ className, children, ...props }) => {
               return (
@@ -569,9 +590,31 @@ const MessageRenderer = memo(
                 </code>
               );
             },
+            ol: ({ children }) => {
+              return <ol style={{ margin: '0.5em 0' }}>{children}</ol>;
+            },
+            ul: ({ children }) => {
+              return <ul style={{ margin: '0.5em 0', paddingLeft: '1.5em' }}>{children}</ul>;
+            },
+            li: ({ children }) => {
+              // 处理列表项内容
+              const content = String(children);
+              // 检查是否是有序列表项（以数字开头）
+              const match = content.match(/^(\d+)\.\s*(.*)/);
+              if (match) {
+                const [_, number, text] = match;
+                return (
+                  <li style={{ margin: '0.3em 0' }}>
+                    <span style={{ marginRight: '0.5em', fontWeight: 500 }}>{number}.</span>
+                    {text}
+                  </li>
+                );
+              }
+              return <li style={{ margin: '0.3em 0' }}>{children}</li>;
+            }
           }}
         >
-          {content}
+          {content.split('\n').join('\n\n')}
         </ReactMarkdown>
       </>
     );
@@ -749,6 +792,7 @@ const QuizPage = () => {
                 if (data.event === 'message') {
                   if (data.answer) {
                     accumulatedContent += data.answer;
+                    console.log('accumulatedContent', accumulatedContent);
                     const { displayContent, options, result } =
                       processMessageContent(accumulatedContent);
                     setMessages((prev) =>
