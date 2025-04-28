@@ -37,6 +37,10 @@ jobs:
           echo MYSQL_USER=${{ secrets.MYSQL_USER }} >> .env
           echo MYSQL_PASSWORD=${{ secrets.MYSQL_PASSWORD }} >> .env
           echo MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }} >> .env
+          echo SSH_HOST=${{ secrets.SSH_HOST }} >> .env
+          echo SSH_USER=${{ secrets.SSH_USER }} >> .env
+          echo SSH_PRIVATE_KEY=${{ secrets.SSH_PRIVATE_KEY }} >> .env
+
 
 
       - name: Build project
